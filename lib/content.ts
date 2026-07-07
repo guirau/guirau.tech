@@ -150,7 +150,8 @@ export const services = {
       duration: "5 days",
       note: "",
       headline: "Manual work automated in a week",
-      tagline: "An n8n & AI workflow, built, tested, and live",
+      // Verbatim from CONTENT.md (contains a pre-existing em-dash, preserved).
+      tagline: "An n8n & AI workflow — built, tested, and live",
       whatYouGet: [
         "A 30-minute free discovery call",
         "A complete n8n workflow (up to ~15 steps), live in production",
@@ -209,15 +210,20 @@ export const services = {
       duration: "5 weeks",
       note: "the flagship",
       headline: "Your AI idea launched in 5 weeks",
-      tagline: "A full-stack AI product, live in your cloud",
+      // Verbatim from CONTENT.md (contains a pre-existing em-dash, preserved).
+      tagline: "A full-stack AI product — live in your cloud",
+      // Verbatim CONTENT.md bullets (label: description). Nested backend/frontend
+      // sub-points kept as their own items so no selling point is dropped.
       whatYouGet: [
-        "A complete, full-stack AI app your customers can use from day one, not a prototype",
-        "AI grounded in your data, workflows, and processes",
-        "Solid architecture in Python or TypeScript, plus a modern React frontend",
-        "Enterprise-grade infrastructure on AWS, GCP or Vercel with Docker & Kubernetes",
-        "Your data stays private, in your own cloud (GDPR, ISO setup available)",
-        "Infrastructure-as-code, CI/CD, and full technical + business docs",
-        "30 days of post-launch support",
+        "A complete AI app: Full-stack AI app running on cloud infrastructure. An app your customers can use from day one, not a prototype.",
+        "AI that thinks like your business: Your workflows and knowledge digitalized, answers grounded in your data, and systems that follow your processes.",
+        "Solid architecture, no over-engineering: AI agents, custom ML APIs, data pipelines, analytics systems, reporting platforms, workflow automation…",
+        "A solid backend in Python or TypeScript, built to scale and easy to maintain.",
+        "A modern React frontend that will make your product a pleasure to use.",
+        "Enterprise-grade infrastructure: AWS, GCP or Vercel with Docker & Kubernetes for scalability, fault-tolerant design, and automated backups. You'll never lose data or stop serving users.",
+        "Your data stays private: Your data lives in your own cloud, under your control, never passing through third parties. Compliant setup (GDPR, ISO) available.",
+        "Nothing depends on me: Infrastructure-as-code and CI/CD make every setup reproducible, plus full technical docs for any engineer to extend it, and business docs for you to understand it without being technical.",
+        "30 days of post-launch support: I stay on after launch to fix issues and make sure everything runs smoothly.",
       ],
       flagship: true,
     },

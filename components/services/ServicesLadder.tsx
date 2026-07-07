@@ -1,6 +1,19 @@
 import { services, type Offer } from "@/lib/content";
 import { Reveal } from "@/components/ui/Reveal";
 
+/** Renders a bullet, resolving a verbatim "Label: description" into a bold
+ *  label + description (only the flagship's CONTENT.md bullets use colons). */
+function BulletText({ text }: { text: string }) {
+  const idx = text.indexOf(": ");
+  if (idx === -1) return <span>{text}</span>;
+  return (
+    <span>
+      <span className="font-semibold text-primary">{text.slice(0, idx)}</span>
+      {text.slice(idx + 1)}
+    </span>
+  );
+}
+
 function Check() {
   return (
     <svg
@@ -59,7 +72,7 @@ function OfferCard({ offer }: { offer: Offer }) {
         {offer.whatYouGet.map((item) => (
           <li key={item} className="text-small flex gap-2.5 text-secondary">
             <Check />
-            <span>{item}</span>
+            <BulletText text={item} />
           </li>
         ))}
       </ul>
@@ -125,7 +138,7 @@ function FlagshipCard({ offer }: { offer: Offer }) {
           {offer.whatYouGet.map((item) => (
             <li key={item} className="text-small flex gap-2.5 text-secondary">
               <Check />
-              <span>{item}</span>
+              <BulletText text={item} />
             </li>
           ))}
         </ul>
