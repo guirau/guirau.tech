@@ -1,0 +1,387 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   Tailwind v4 theme mapping.
+   `@theme inline` makes utilities (bg-surface-0, text-primary, ...) compile to
+   `var(--role)` rather than baking a value in — so when [data-theme="dark"]
+   redefines the role variable, every utility re-points live. This is what makes
+   the section-scoped dark "proof zone" work without prefers-color-scheme.
+   ========================================================================== */
+@theme inline {
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-hairline: var(--hairline);
+  --color-border: var(--border);
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-tertiary: var(--text-tertiary);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-tint: var(--accent-tint);
+  --color-on-accent: var(--on-accent);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------------------------------------------------------------------------
+   Role tokens — light (default / trust register)
+   Exact values from CLAUDE.md Style & Design System.
+   ------------------------------------------------------------------------- */
+:root {
+  --surface-0: #fbfbfd;
+  --surface-1: #f4f5f8;
+  --surface-2: #ebedf2;
+  --hairline: #e4e7ec;
+  --border: #d3d8e0;
+  --text-primary: #15171c;
+  --text-secondary: #565d6b;
+  --text-tertiary: #878e9c;
+  --accent: #1e63f5;
+  --accent-hover: #1a53d1;
+  --accent-tint: #edf3fe;
+  --on-accent: #ffffff;
+  --success: #1f9d57;
+  --danger: #dc3b41;
+
+  /* Fluid type scale (min -> max) */
+  --text-display: clamp(2.75rem, 1.4rem + 6.2vw, 6rem);
+  --text-title-1: clamp(2rem, 1.6rem + 1.8vw, 2.75rem);
+  --text-title-2: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+  --text-title-3: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-lead: clamp(1.1875rem, 1.1rem + 0.4vw, 1.375rem);
+  --text-body: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --text-small: 0.9375rem;
+  --text-mono: 0.875rem;
+  --text-caption: 0.8125rem;
+
+  /* Section rhythm + measure */
+  --space-section: clamp(5rem, 3rem + 8vw, 10rem);
+  --measure: 68ch;
+  --content-max: 1200px;
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur-normal: 300ms;
+  --dur-slow: 600ms;
+
+  color-scheme: light;
+}
+
+/* ---------------------------------------------------------------------------
+   Role tokens — dark ("proof zone").
+   Applied ONLY to section-scoped wrappers, never OS-driven. The site is
+   light-primary; dark is an art-directed register for the proof sections.
+   ------------------------------------------------------------------------- */
+[data-theme="dark"] {
+  --surface-0: #101218;
+  --surface-1: #191c24;
+  --surface-2: #232733;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --border: #3a4150;
+  --text-primary: #f1f3f8;
+  --text-secondary: #a6aebf;
+  --text-tertiary: #707890;
+  --accent: #4c82ff;
+  --accent-hover: #6b99ff;
+  --accent-tint: rgba(76, 130, 255, 0.12);
+  --on-accent: #0a0c10;
+  --success: #37c46f;
+  --danger: #ff6166;
+
+  color-scheme: dark;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------------- */
+@layer base {
+  * {
+    border-color: var(--hairline);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--surface-0);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  /* Accent focus ring — coloured = interactive. */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Type scale — semantic classes bundle size + weight + tracking + line-height
+   so hierarchy comes from weight/size/space (never a second face or colour).
+   ------------------------------------------------------------------------- */
+@layer components {
+  .text-display {
+    font-size: var(--text-display);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    line-height: 1;
+  }
+  .text-title-1 {
+    font-size: var(--text-title-1);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+  }
+  .text-title-2 {
+    font-size: var(--text-title-2);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  .text-title-3 {
+    font-size: var(--text-title-3);
+    font-weight: 500;
+    line-height: 1.25;
+  }
+  .text-lead {
+    font-size: var(--text-lead);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+  .text-body {
+    font-size: var(--text-body);
+    font-weight: 400;
+    line-height: 1.55;
+  }
+  .text-small {
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+  .text-mono {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    font-weight: 500;
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.01em;
+  }
+  .text-caption {
+    font-size: var(--text-caption);
+    font-weight: 500;
+    color: var(--text-tertiary);
+  }
+
+  /* Layout helpers */
+  .container-content {
+    width: 100%;
+    max-width: var(--content-max);
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 0.5rem + 3vw, 2.5rem);
+  }
+  .section {
+    padding-block: var(--space-section);
+  }
+  .measure {
+    max-width: var(--measure);
+  }
+
+  /* Glass — used ONLY on sticky nav + demo control panels, never page-wide. */
+  .glass {
+    background-color: color-mix(in srgb, var(--surface-0) 72%, transparent);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+  }
+
+  /* Hero atmosphere — faint instrument grid, fading out toward edges. Static
+     background-image only (no motion, no compositor cost). */
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--hairline) 1px, transparent 1px),
+      linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(
+      120% 90% at 15% 0%,
+      #000 0%,
+      transparent 65%
+    );
+    mask-image: radial-gradient(120% 90% at 15% 0%, #000 0%, transparent 65%);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* Eyebrow — mono section label; the typographic tell for "evidence". */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* Buttons — pill CTAs, 44px min target, compositor-only hover-lift. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding-inline: 1.5rem;
+    border-radius: 999px;
+    font-size: var(--text-body);
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      transform var(--dur-fast) ease,
+      background-color var(--dur-fast) ease,
+      box-shadow var(--dur-fast) ease,
+      color var(--dur-fast) ease;
+    will-change: transform;
+  }
+  .btn-accent {
+    background-color: var(--accent);
+    color: var(--on-accent);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+  }
+  .btn-accent:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .btn-ghost {
+    color: var(--accent);
+    border: 1px solid var(--border);
+    background-color: transparent;
+  }
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    background-color: var(--accent-tint);
+  }
+
+  /* Mono status chip — instrument-panel motif (model labels, status). */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background-color: var(--surface-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+  }
+  /* Accent-family chip for small NON-interactive labels (notes, "recommended").
+     Uses the darker accent-hover so small text clears WCAG AA (~5.3:1); the
+     live accent stays reserved for interactive elements. */
+  .chip-accent {
+    color: var(--accent-hover);
+    border-color: color-mix(in srgb, var(--accent) 24%, transparent);
+    background-color: var(--accent-tint);
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background-color: var(--text-tertiary);
+    flex: none;
+  }
+  .status-dot--pending {
+    background-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
+  }
+
+  /* Surface card — soft layered elevation (light) / luminous (dark). */
+  .surface-card {
+    background-color: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+  }
+
+  /* Hairlines */
+  .hairline-top {
+    border-top: 1px solid var(--hairline);
+  }
+  .hairline-bottom {
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  /* Hero staged reveal — opacity + small translateY, expo ease. Motion-safe
+     only; reduced-motion users get instant, per the global override. */
+  .rise {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: rise var(--dur-slow) var(--ease-out-expo) forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rise {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+  }
+  @keyframes rise {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Scroll-in reveal — driven by IntersectionObserver (data attr). Default
+     (SSR / no-JS / reduced-motion) is fully visible; only motion-safe JS hides
+     then reveals. */
+  [data-reveal="hidden"] {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  [data-reveal="shown"] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--dur-slow) var(--ease-out-expo),
+      transform var(--dur-slow) var(--ease-out-expo);
+  }
+}
