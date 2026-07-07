@@ -25,6 +25,7 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  --font-display: var(--font-display-face), var(--font-geist-sans), sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -38,24 +39,30 @@
    Exact values from CLAUDE.md Style & Design System.
    ------------------------------------------------------------------------- */
 :root {
-  --surface-0: #fbfbfd;
-  --surface-1: #f4f5f8;
-  --surface-2: #ebedf2;
-  --hairline: #e4e7ec;
-  --border: #d3d8e0;
-  --text-primary: #15171c;
-  --text-secondary: #565d6b;
-  --text-tertiary: #878e9c;
-  --accent: #1e63f5;
-  --accent-hover: #1a53d1;
-  --accent-tint: #edf3fe;
+  /* Warm "paper" register — atmospheric, not clinical white. */
+  --surface-0: #f4eee3;
+  --surface-1: #ebe3d4;
+  --surface-2: #e1d7c4;
+  --hairline: rgba(28, 23, 18, 0.1);
+  --border: #cdc1ab;
+  --text-primary: #1b1610;
+  --text-secondary: #564e41;
+  --text-tertiary: #8a7f6f;
+  --accent: #1e5ae6;
+  --accent-hover: #1746be;
+  --accent-tint: rgba(30, 90, 230, 0.1);
   --on-accent: #ffffff;
-  --success: #1f9d57;
-  --danger: #dc3b41;
+  --success: #2e7d46;
+  --danger: #c43d2e;
 
-  /* Fluid type scale (min -> max) */
-  --text-display: clamp(2.75rem, 1.4rem + 6.2vw, 6rem);
-  --text-title-1: clamp(2rem, 1.6rem + 1.8vw, 2.75rem);
+  /* Warm atmosphere layers */
+  --glow-warm: rgba(226, 176, 106, 0.5);
+  --glow-warm-2: rgba(214, 128, 74, 0.28);
+  --paper-edge: rgba(28, 23, 18, 0.05);
+
+  /* Fluid type scale (min -> max) — dramatic hero, calm mid-range. */
+  --text-display: clamp(3.25rem, 0.5rem + 11vw, 9.5rem);
+  --text-title-1: clamp(2.25rem, 1.5rem + 3vw, 3.75rem);
   --text-title-2: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
   --text-title-3: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
   --text-lead: clamp(1.1875rem, 1.1rem + 0.4vw, 1.375rem);
@@ -83,20 +90,25 @@
    light-primary; dark is an art-directed register for the proof sections.
    ------------------------------------------------------------------------- */
 [data-theme="dark"] {
-  --surface-0: #101218;
-  --surface-1: #191c24;
-  --surface-2: #232733;
-  --hairline: rgba(255, 255, 255, 0.08);
-  --border: #3a4150;
-  --text-primary: #f1f3f8;
-  --text-secondary: #a6aebf;
-  --text-tertiary: #707890;
-  --accent: #4c82ff;
-  --accent-hover: #6b99ff;
-  --accent-tint: rgba(76, 130, 255, 0.12);
-  --on-accent: #0a0c10;
-  --success: #37c46f;
-  --danger: #ff6166;
+  /* Warm espresso "proof" register (not cold charcoal). */
+  --surface-0: #17130d;
+  --surface-1: #201a14;
+  --surface-2: #2a2318;
+  --hairline: rgba(255, 248, 235, 0.09);
+  --border: #453a2c;
+  --text-primary: #f4eee2;
+  --text-secondary: #b9ad98;
+  --text-tertiary: #857a67;
+  --accent: #6e9bff;
+  --accent-hover: #8fb2ff;
+  --accent-tint: rgba(110, 155, 255, 0.14);
+  --on-accent: #14100b;
+  --success: #46c46f;
+  --danger: #ff6b5a;
+
+  --glow-warm: rgba(226, 150, 78, 0.22);
+  --glow-warm-2: rgba(196, 96, 40, 0.16);
+  --paper-edge: rgba(255, 248, 235, 0.04);
 
   color-scheme: dark;
 }
@@ -157,16 +169,18 @@
    ------------------------------------------------------------------------- */
 @layer components {
   .text-display {
+    font-family: var(--font-display);
     font-size: var(--text-display);
-    font-weight: 600;
-    letter-spacing: -0.022em;
-    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.92;
   }
   .text-title-1 {
+    font-family: var(--font-display);
     font-size: var(--text-title-1);
     font-weight: 600;
-    letter-spacing: -0.015em;
-    line-height: 1.1;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
   }
   .text-title-2 {
     font-size: var(--text-title-2);
@@ -228,22 +242,43 @@
     -webkit-backdrop-filter: blur(16px) saturate(150%);
   }
 
-  /* Hero atmosphere — faint instrument grid, fading out toward edges. Static
-     background-image only (no motion, no compositor cost). */
+  /* Warm atmospheric wash — full-bleed, layered radial glows. Replaces flat
+     surfaces with cinematic depth (compositor-cheap, static). */
+  .atmosphere {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(70% 55% at 78% 12%, var(--glow-warm), transparent 60%),
+      radial-gradient(55% 50% at 8% 92%, var(--glow-warm-2), transparent 62%);
+  }
+
+  /* Film grain — SVG fractal-noise data URI, low opacity, over the atmosphere.
+     Adds texture so surfaces never read as flat digital fills. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Faint engineering grid — now a texture layer, masked, subtle. */
   .hero-grid {
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(var(--hairline) 1px, transparent 1px),
-      linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
-    background-size: 64px 64px;
+      linear-gradient(var(--paper-edge) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-edge) 1px, transparent 1px);
+    background-size: 72px 72px;
     -webkit-mask-image: radial-gradient(
-      120% 90% at 15% 0%,
+      130% 100% at 20% 10%,
       #000 0%,
-      transparent 65%
+      transparent 70%
     );
-    mask-image: radial-gradient(120% 90% at 15% 0%, #000 0%, transparent 65%);
-    opacity: 0.6;
+    mask-image: radial-gradient(130% 100% at 20% 10%, #000 0%, transparent 70%);
     pointer-events: none;
   }
 
