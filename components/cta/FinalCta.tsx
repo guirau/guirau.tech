@@ -2,42 +2,32 @@ import { finalCta } from "@/lib/content";
 import { Reveal } from "@/components/ui/Reveal";
 
 /**
- * §8 Final CTA / close — light, warm accent zone. THE single emphatic ask,
- * earned by everything above. Carries its weight through composition + accent
- * colour, not scroll motion (the style supports only two motion set-pieces).
- * id="book" is the booking destination + swappable scheduler anchor.
+ * §8 Final CTA / close — the single emphatic ask, earned by everything above.
+ * Weight comes from composition + a warm atmosphere + the one accent button,
+ * not scroll motion. id="book" is the booking destination + swappable anchor.
  */
 export function FinalCta() {
   return (
     <section
       id="book"
       aria-labelledby="cta-heading"
-      className="section relative overflow-hidden"
-      style={{ backgroundColor: "var(--accent-tint)" }}
+      className="grain relative overflow-hidden bg-surface-1"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, var(--accent), transparent)",
-          opacity: 0.5,
-        }}
-      />
-      <div className="container-content">
-        <Reveal className="mx-auto flex max-w-2xl flex-col items-center text-center">
+      <div aria-hidden className="atmosphere" />
+      <div className="container-content relative py-28 sm:py-40">
+        <Reveal className="mx-auto flex max-w-3xl flex-col items-center text-center">
           <h2
             id="cta-heading"
-            className="text-title-1 text-balance text-primary"
+            className="text-display text-balance text-primary"
           >
             {finalCta.heading}
           </h2>
-          <p className="text-lead mt-5 max-w-xl">{finalCta.body}</p>
+          <p className="text-lead mt-8 max-w-xl">{finalCta.body}</p>
 
-          <a href={finalCta.cta.href} className="btn btn-accent mt-10">
+          <a href={finalCta.cta.href} className="btn btn-accent mt-12">
             {finalCta.cta.label}
           </a>
-          <p className="text-caption mt-4">{finalCta.reassurance}</p>
+          <p className="text-caption mt-5">{finalCta.reassurance}</p>
         </Reveal>
       </div>
     </section>
