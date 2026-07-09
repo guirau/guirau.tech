@@ -12,8 +12,14 @@ export function Hero() {
       aria-labelledby="hero-heading"
       className="grain relative flex min-h-[100svh] flex-col justify-center overflow-hidden"
     >
-      <div aria-hidden className="atmosphere" />
-      <div aria-hidden className="hero-grid" />
+      {/* Hero media stage — full-bleed layer for the scroll-scrubbed hero VIDEO
+          (provided later). For now the warm atmosphere is the placeholder; drop
+          a <video data-hero-video> here and wire scroll scrub when the asset
+          lands. Type overlays this layer. */}
+      <div data-hero-media aria-hidden className="absolute inset-0">
+        <div className="atmosphere" />
+        <div className="hero-grid" />
+      </div>
 
       <div className="container-content relative">
         <p className="rise eyebrow mb-8" style={{ animationDelay: "40ms" }}>
