@@ -38,7 +38,7 @@ rationale and CSS.
 │                  │  ROBOT   │                        │  full-bleed backdrop;
 │                  ╰──────────╯                        │  robot upper ~60%,
 │                                                      │  biased right
-│  Alejandro Guirau                    ← tagline, 600  │
+│  Alejandro Guirau                    ← eyebrow, 600  │
 │  Freelance AI engineer.              ← headline,     │
 │  Production systems, not prototypes.   gradient, 600 │
 │                              ╭─────────────────────╮ │

@@ -192,8 +192,8 @@ v2 is one screen, so it needs six roles, not a full ramp.
 
 | Token | Size | Weight | Colour |
 |---|---|---|---|
+| `--text-eyebrow` | `clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem)` 22→28px | 600 | `--text-secondary` |
 | `--text-headline` | `clamp(2.5rem, 1.2rem + 5.6vw, 4rem)` 40→64px | 600 | gradient (§3) |
-| `--text-tagline` | `clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem)` 22→28px | 600 | `--text-secondary` |
 | `--text-body` | `1.0625rem` 17px | 400 | `--text-primary` |
 | `--text-link` | `1.0625rem` 17px | 400 | `--accent-text` |
 | `--text-caption` | `0.8125rem` 13px | 400 | `--text-secondary` |
@@ -205,6 +205,42 @@ The caption is 13px rather than Apple's measured 12px. **[derived]** — that
 row is the footer legal string, which a business-verification reviewer has to
 read; one step of extra legibility is worth more than exact parity, and at
 `--text-secondary` it still measures 5.80:1 and still reads as quiet.
+
+### 2.5 Which text gets which role
+
+**The name is the eyebrow. The positioning line is the headline.** **[derived,
+deliberate]**
+
+| Slot | Copy | Treatment |
+|---|---|---|
+| eyebrow | `Alejandro Guirau` | 22→28px, 600, `--text-secondary` |
+| headline | `Freelance AI engineer. Production systems, not prototypes.` | 40→64px, 600, gradient |
+
+This is worth stating explicitly because it looks inverted at a glance: the name
+is the small grey text and the pitch is the giant gradient one.
+
+It matches Apple. Their marquee runs **eyebrow 28px → headline 64px → tagline
+28px**, and the eyebrow is the *product name* ("MacBook Pro") while the headline
+is the *claim*. The name identifies; the headline sells. Since the one colour
+moment lands on the headline, the gradient is spent on the claim, which is the
+correct place for a conversion page — a visitor who does not yet know the name
+has no reason to care about it, and a visitor who does will still find it.
+
+If a future niche re-skin swaps the copy, keep the roles: name in the eyebrow,
+claim in the headline. Do not promote the name to display size.
+
+**Measure cap.** The headline is a two-to-three line block, not a banner. At
+64px in a `minmax(0, 1fr)` column beside the card it has roughly 50–60% of the
+viewport, so cap it explicitly rather than letting ultrawide flatten it to one
+long line:
+
+```css
+.marquee__headline { max-width: 20ch; text-wrap: balance; }
+```
+
+**[tune]** — 20ch holds the current 52-character line to 2 lines at 1440px and
+3 at 1024px. Re-check whenever the copy changes, and verify the block still
+clears the robot's feet at the tallest wrap.
 
 ---
 
@@ -338,7 +374,7 @@ action card bottom-right.
 │                  │          │   behind everything    │  biased right
 │                  ╰──────────╯                        │
 │                                                      │
-│  Alejandro Guirau                    ← tagline, 600  │
+│  Alejandro Guirau                    ← eyebrow, 600  │
 │  Freelance AI engineer.              ← headline,     │
 │  Production systems, not prototypes.   gradient, 600 │
 │                              ╭─────────────────────╮ │
@@ -369,6 +405,14 @@ action card bottom-right.
 .marquee__text   { grid-area: 2 / 1; align-self: end; }
 .marquee__card   { grid-area: 2 / 2; align-self: end; }
 .marquee__footer { grid-area: 3 / 1 / 4 / 3; }
+
+/* The legal string must render as literal characters. Disable inherited
+   font features so no ligature or contextual alternate can substitute the
+   hyphen a verification reviewer is matching against. */
+.marquee__footer {
+  font-variant-ligatures: none;
+  font-feature-settings: normal;
+}
 ```
 
 The canvas becomes a fixed full-bleed backdrop rather than a flex child. This
@@ -464,6 +508,11 @@ Verifiable, not aspirational. Each must be checked before v2 ships.
 - [ ] No font-weight 700 anywhere
 - [ ] Footer legal string is real text, legible without scrolling, at every
       breakpoint from 320px up
+- [ ] Footer legal string copies out of the rendered page byte-identical to the
+      root `index.html` version, plain hyphen-minus intact (§5.1 disables font
+      features on the footer; confirm nothing re-enables them)
+- [ ] Headline wraps to 2–3 lines at 1440px / 1024px / 768px and clears the
+      robot's feet at the tallest wrap; `max-width` recorded in §2.5
 - [ ] Every interactive target ≥44×44px
 - [ ] Keyboard path reaches all four links plus both dialogs; focus visible
       throughout; Esc closes dialogs; focus returns to trigger

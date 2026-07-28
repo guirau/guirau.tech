@@ -167,7 +167,7 @@ bottom-left, floating action card bottom-right.
 │                  │  ROBOT   │                        │  robot in upper ~60%,
 │                  ╰──────────╯                        │  biased right
 │                                                      │
-│  Alejandro Guirau                    ← tagline       │
+│  Alejandro Guirau                    ← eyebrow       │
 │  Freelance AI engineer.              ← headline,     │
 │  Production systems, not prototypes.   gradient      │
 │                              ╭─────────────────────╮ │
@@ -208,12 +208,18 @@ is scroll-driven and does not port to a single screen. Everything else is a
 ### Swappable-for-niching blocks
 
 Content-only, so a future niche re-skin (creator economy, performance marketing
-— see `CONTEXT.md`) never touches structure: the headline and tagline, and the
+— see `CONTEXT.md`) never touches structure: the headline and eyebrow, and the
 Services dialog copy. Fixed regardless of niche: the marquee composition, the
 link split, the accent-driven Contact pill, and the footer legal string.
 
+**Keep the roles when swapping copy.** The name is the *eyebrow* (small, grey);
+the positioning line is the *headline* (large, gradient). That is Apple's
+marquee order, and it puts the one colour moment on the claim rather than the
+name. Do not promote the name to display size. See `DESIGN-SYSTEM.md` §2.5.
+
 > **Content note:** pull all words/numbers from `CONTENT.md`. **Santander is
 > gated** — held back, confirm before it ships publicly (see Cautions).
+
 ## Positioning & Copy Strategy
 
 Durable strategy for the build. The *words and numbers* live in `CONTENT.md`
@@ -229,7 +235,7 @@ that govern how those words are framed and where they may be swapped.
   AI apps, agents, automations). Niche re-skins come later — candidates: creator
   economy, performance marketing (variant copy in `docs/variants/`).
 - **Swappable-for-niching blocks (content-only, never structural):** the headline
-  and tagline, and the Services dialog copy. **Fixed regardless of niche:** the
+  and eyebrow, and the Services dialog copy. **Fixed regardless of niche:** the
   marquee composition, the link split, the accent-driven Contact pill, and the
   footer legal string.
 
