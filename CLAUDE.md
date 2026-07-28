@@ -7,10 +7,17 @@ Guidance for Claude Code when working in this repository.
 Do **not** open, `cat`, `grep`, or otherwise load the contents of these paths.
 They are stale or private and will pollute fresh work:
 
-- **`_legacy/`** — the old v0 website (HTML5 UP template, jQuery, FontAwesome, SASS).
-  Kept for reference only. It is **not** the design direction for the rebuild; reading
-  it biases new work toward outdated patterns.
-- **`docs/METHOD.md`** — private working notes. Not an input to the build.
+- **`docs/method.md`** — private working notes. Not an input to the build.
+- **v0 at the repo root** — `index.html`, `assets/`, `images/`, `projects/`. The
+  original HTML5 UP template (jQuery, FontAwesome, SASS). It is **not** the design
+  direction for v2, and reading it biases new work toward outdated patterns.
+  It was previously archived under `_legacy/`; that directory no longer exists and
+  the v0 files were restored to root, so this rule now names the root paths instead.
+
+  **Narrow exception:** `index.html` is the *live* site and the reference for the
+  footer legal string. Reading a specific line to confirm that string is fine
+  (it is `Alejandro Guirau - Software Consulting`, plain hyphen, at lines 4, 24
+  and 385). Do not read it for layout, styling, or markup patterns.
 
 > A hard backstop for the Read tool is configured in `.claude/settings.local.json`
 > (`permissions.deny`). This section extends that to Bash/Grep by intent — please
@@ -28,227 +35,185 @@ call closes.** See `docs/CONTEXT.md` for the full why/who/strategy.
 
 ## Current status
 
-Rebuild in progress. The **new site has not been built yet** — there is no
-production HTML/CSS/JS at the repo root, no `package.json`, and no build tooling.
-Right now the repo holds **planning docs** (`docs/`) plus the archived v0 in
-`_legacy/`.
+Three generations of the site coexist in this repo:
+
+| Where | What | State |
+|---|---|---|
+| repo **root** | **v0** — the original HTML5 UP template site | **currently live** on GitHub Pages; kept for Meta domain verification |
+| `latest/v1/` | **v1** — Next.js + Tailwind build of the nine-section scroll funnel (hero → credentials → proof zone → services ladder → process → about → final CTA) | built, **not deployed** |
+| `latest/v2/` | **v2** — single-screen robot page. The current work. | **not yet built** — spec written, no code |
+
+**v2 is the active target.** This file's design system, structure, and tech
+sections describe v2 and only v2; they previously described v1, whose blueprint
+now lives in git history and in the `latest/v1/` source itself.
 
 ## Repository map
 
 ```
 .
-├── docs/                     # Planning & content (source of truth for the build)
+├── index.html, assets/, images/, projects/   # v0 — live site (see Cautions)
+├── latest/
+│   ├── v1/                   # Next.js build of the nine-section funnel
+│   └── v2/                   # ← the current work (not yet created)
+├── docs/
 │   ├── CONTEXT.md            # Why/who/funnel/success criteria — read first
-│   ├── CONTENT.md            # Actual copy: offers, prices, tiers, credentials, CTAs
+│   ├── CONTENT.md            # Actual copy: offers, prices, tiers, credentials
+│   ├── DESIGN-SYSTEM.md      # v2 design system (Apple-derived, measured)
+│   ├── STRUCTURE.md          # Scroll-showcase reference pattern
+│   ├── superpowers/specs/    # Build specs — v2 robot page lives here
+│   ├── setup-guides/         # 3D toolchain setup (Blender, Higgsfield)
+│   ├── support/              # Apple HIG notes, working checklist
 │   ├── variants/             # Niche copy variants (creator, performance)
-│   ├── the_10k_checklist.md  # Working checklist
-│   └── METHOD.md             # ⛔ private notes — do not read
-├── _legacy/                  # ⛔ archived v0 site — do not read
-├── .github/workflows/
-│   └── static.yml            # Deploys the repo to GitHub Pages on push to main
-└── .claude/
-    └── settings.local.json   # Local permissions (deny rules for the paths above)
+│   ├── higgsfield-model-specs.json   # Captured CLI parameter schemas
+│   └── method.md             # ⛔ private notes — do not read
+├── docs/reference/           # gitignored — third-party screenshots, never ship
+└── .github/workflows/
+    └── static.yml            # Publishes the ENTIRE repo to GitHub Pages
 ```
 
 ## Documentation hierarchy (sources of truth)
 
 1. **`docs/CONTEXT.md`** — the *why and who*. Read first for orientation.
-2. **`CLAUDE.md`** (this file) — the rules to obey when building. Over time this
-   grows to hold the design system, structure/narrative blueprint, and copy
-   *strategy* (per the intent noted in CONTEXT.md).
-3. **`docs/CONTENT.md`** — the *actual words and numbers* (offers, prices,
+2. **`CLAUDE.md`** (this file) — the rules to obey when building v2.
+3. **`docs/superpowers/specs/2026-07-28-latest-v2-robot-design.md`** — the v2
+   build spec: page structure, asset pipeline, robot runtime, acceptance criteria.
+4. **`docs/DESIGN-SYSTEM.md`** — v2 visual system. Authoritative for every token,
+   contrast ratio, and composition rule; tags each value measured / derived /
+   to-be-tuned.
+5. **`docs/CONTENT.md`** — the *actual words and numbers* (offers, prices,
    employer names, headlines, CTAs). Single source of truth for copy — do not
    invent or alter offers/prices; pull them from here.
 
 ## Style & Design System
 
-The locked visual direction for the rebuild. Derived from Apple's HIG
-(clarity / deference / depth) but re-tuned from a calm *content app* into a
-*conversion funnel*: keep Apple's engineering discipline (restraint, semantic
-colour, hierarchy-by-weight, accessibility); drop the parts tuned for passive
-consumption rather than active persuasion. **Reference:** `docs/Apple_Design_System.md`.
+**Full spec: `docs/DESIGN-SYSTEM.md`.** That file is authoritative and tags every
+value as measured / derived / to-be-tuned. This section is the summary and the
+non-negotiables.
+
+Derived from Apple's **MacBook Pro product page**, measured live from computed
+styles — not from the HIG. The two are different design languages from the same
+company: the HIG governs app UI, the product page governs marketing. v2 is a
+marketing page. (`docs/support/Apple_design_system.md` is the HIG doc; it still
+supplies the accessibility floor and the reserve-colour-for-action rule.)
+
+### The five rules
+
+1. **Two background values, total** — `#000000` and `#1D1D1F`. Not a ramp.
+2. **Depth from surface delta, not shadows** — no `box-shadow` anywhere on the
+   page. Elevation is a luminance step plus a 28px radius.
+3. **Display type is weight 600; buttons are weight 400** — never 700, anywhere.
+   Hierarchy comes from size, and the button earns emphasis from its fill.
+4. **Rhythm is asymmetric** — nothing is padded equally on all sides.
+5. **One colour moment** — a gradient-clipped headline, in an otherwise
+   monochrome page. Blue appears only on interactive elements.
+
+### Tokens (abbreviated — full set in `DESIGN-SYSTEM.md`)
+
+| Role | Value | Note |
+|---|---|---|
+| `--surface-0` | `#000000` | page, robot stage |
+| `--surface-1` | `#1D1D1F` | raised: dialogs, floating card |
+| `--text-primary` | `#F5F5F7` | 19.3:1 on surface-0 |
+| `--text-secondary` | `#86868B` | 5.8:1 — there is **no** tertiary tier |
+| `--accent` | `#0071E3` | **fill only** |
+| `--accent-text` | `#2997FF` | text links on black |
+| `--on-accent` | `#FFFFFF` | 4.70:1 on accent, tight |
+
+**`color: var(--accent)` is forbidden.** `#0071E3` as text on black measures
+4.47:1 and fails AA. It is a fill colour; `--accent-text` is the text colour.
+For the same reason `--accent-hover` goes *lighter*, not darker.
 
 ### Typefaces
 
-- **Display & body: Geist Sans** — self-hosted, variable (`wght` 400–700),
-  Latin-subset `woff2`. SF-adjacent and neutral, but built for a developer-tools
-  brand, so it carries "modern engineering" without being loud. Chosen over Inter
-  deliberately (Inter is the SaaS default — too template).
-- **Technical: Geist Mono** — the designed companion. Reserved for *evidence*:
-  model names (`CLIP ViT-B/32`, `SegFormer`), demo output, latency/confidence
-  readouts, endpoint/technical labels. Mono is not decoration — it is the
-  typographic tell for the site's core differentiator (real production engineering).
-- One family, two roles. Hierarchy comes from **weight + size + space**, never a
-  third face or scattered colour.
-- Perf: variable file covers all weights; preload only the hero weight;
-  `font-display: swap` for the rest (on Next.js, `next/font` self-hosts and
-  subsets Geist automatically). Landing-page budget: **JS < 150kb, CSS < 30kb
-  gzipped** — hold the line with server components and static rendering, ship
-  client JS only where a section needs it.
+Geist Sans and Geist Mono, self-hosted variable, subset, `font-display: swap`.
+Unchanged. SF Pro is not an option — the `-apple-system` stack renders SF only on
+Apple devices and falls back to Helvetica/Arial elsewhere, which would show a
+third of visitors a design tuned for a font they are not seeing.
 
-### Colour palette — semantic, role-first (light default + dark proof zone)
+**Tracking is not portable from Apple.** Their curve (near-neutral at display,
+−0.022em at body) is a product of SF Pro's optical sizing, which Geist lacks.
+Transfer the principle — per-size optical correction set by eye — not the
+numbers. Starting values and the record of final tuned values live in
+`DESIGN-SYSTEM.md` §2.3.
 
-Author role-based CSS custom properties with a light and a dark value each; the
-site is **light-primary** (trust register) with **dark "proof zones"** for the
-live ML demo sections. The accent (electric blue) is reserved almost entirely
-for interactive elements — "coloured = clickable" — so every CTA is unmissable.
+### Dark, and why that is not a contradiction
 
-| Role | Light (default) | Dark (proof zone) |
-|---|---|---|
-| `--surface-0` (page) | `#FBFBFD` | `#101218` |
-| `--surface-1` (cards) | `#F4F5F8` | `#191C24` |
-| `--surface-2` (wells/insets) | `#EBEDF2` | `#232733` |
-| `--hairline` | `#E4E7EC` | `rgba(255,255,255,.08)` |
-| `--border` | `#D3D8E0` | `#3A4150` |
-| `--text-primary` (label) | `#15171C` | `#F1F3F8` |
-| `--text-secondary` | `#565D6B` | `#A6AEBF` |
-| `--text-tertiary` (meta only) | `#878E9C` | `#707890` |
-| `--accent` (electric blue) | `#1E63F5` | `#4C82FF` |
-| `--accent-hover` | `#1A53D1` | `#6B99FF` |
-| `--accent-tint` (bg wash) | `#EDF3FE` | `rgba(76,130,255,.12)` |
-| `--on-accent` | `#FFFFFF` | `#0A0C10` |
-| `--success` (signal) | `#1F9D57` | `#37C46F` |
-| `--danger` | `#DC3B41` | `#FF6166` |
+Earlier versions of this file locked a light-primary system with dark reserved
+for "proof zones", and forbade flipping the site dark on `prefers-color-scheme`.
 
-Rules: text-primary is off-black, not pure black. `--success`/`--danger` are
-*signal* colours (demo "live"/confidence, errors) — always paired with an icon or
-label, never colour alone, and never competing with the blue accent for *action*.
-`--text-tertiary` is de-emphasized meta only (~3:1 — large/non-essential text).
-**Contrast is a build-time gate:** verify every pairing at WCAG AA before shipping;
-accent-on-white is ~4.6:1 (passes but tight), so accent-bearing text stays
-≥ 16px semibold. In dark mode, accent buttons use dark `--on-accent` text.
+That prohibition still holds and is still obeyed. v2 is dark because it is
+**art-directed dark**, not because the OS asked. The light → dark → light rhythm
+it governed described a nine-section scroll page; v2 has one screen and no
+scroll, so there are no zones to alternate between.
 
-### Type scale — fluid, with deliberate hero drama
-
-17px body floor (Apple). Big scale *contrast* at the hero; calm mid-range.
-
-| Token | Clamp (min → max) | Weight / tracking |
-|---|---|---|
-| `--text-display` (hero) | `clamp(2.75rem, 1.4rem + 6.2vw, 6rem)` 44→96px | 600, `-0.022em`, lh 1.0 |
-| `--text-title-1` | `clamp(2rem, 1.6rem + 1.8vw, 2.75rem)` 32→44px | 600, `-0.015em`, lh 1.1 |
-| `--text-title-2` | `clamp(1.5rem, 1.3rem + 1vw, 1.875rem)` 24→30px | 600, `-0.01em` |
-| `--text-title-3` | `clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem)` 20→24px | 500 |
-| `--text-lead` | `clamp(1.1875rem, 1.1rem + 0.4vw, 1.375rem)` 19→22px | 400, secondary colour |
-| `--text-body` | `clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem)` 17→19px | 400, lh 1.55 |
-| `--text-small` | `0.9375rem` 15px | 400 / 500 |
-| `--text-mono` | `0.875rem` 14px | Geist Mono 500 |
-| `--text-caption` | `0.8125rem` 13px | 500, tertiary |
-
-Text measure capped ~68ch. Weights used: 400 / 500 / 600 / 700 only (no thin/ultralight).
-
-### Spacing rhythm — 8pt grid, intentional not uniform
-
-- Base unit **8px** (4px for fine adjustment). Non-linear scale so rhythm reads
-  composed, not gridded-flat: `--space-*` = `4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 160` px.
-- **Section rhythm:** `--space-section: clamp(5rem, 3rem + 8vw, 10rem)`.
-- Content column `max-width: 1200px`; **44×44px minimum** on every interactive target.
-- **Radius:** `--radius-sm 8px` (controls) · `--radius-md 12px` (cards) ·
-  `--radius-lg 20px` (demo panels) · `--radius-pill 999px` (CTAs).
-- **Depth:** soft layered shadows in light; luminous elevation in dark. Glass
-  (`backdrop-filter: blur(16px)` + translucent surface + hairline) is used **only**
-  on the sticky nav and demo control panels — never page-wide.
-
-### Motion — two signature moments, quiet everywhere else
-
-Tokens: `--dur-fast 150ms` · `--dur-normal 300ms` · `--dur-slow 600ms`;
-`--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1)` for entrances, standard ease for
-hovers. Animate **compositor-friendly properties only** (`transform`, `opacity`,
-`clip-path`).
-
-1. **Hero staged reveal** — headline → subhead → CTA rise on opacity + small
-   `translateY` (expo ease). Sets a calm-confident "senior, in control" tone.
-2. **Light → dark proof-zone hinge** — scrolling into the ML demos, the surface
-   transitions to the dark register and the demo result (segmentation mask /
-   classification) animates in. The narrative pivot from *claim* to *proof*.
-
-Everything else: 150ms hover/focus micro-states and CTA hover-lift. Full
-`prefers-reduced-motion` fallback (opacity-only or instant; no scroll-jacking).
-
-### Core aesthetic principles (the 5 rules that keep it coherent)
-
-1. **Defer to content, emphasize for conversion.** One accent, reserved for action;
-   drama spent only on the hero and the demos.
-2. **Hierarchy from weight, size, and space** — never a second display face or
-   scattered colour.
-3. **Evidence is the ornament.** Mono, real demo output, and technical specificity
-   *are* the decoration — production credibility is the aesthetic.
-4. **Restraint as atmosphere.** Glass and motion appear surgically at named moments;
-   quiet is the default.
-5. **Light → dark narrative rhythm.** The page breathes between a light "trust"
-   register and dark "proof" zones — the contrast carries the story.
-
-**Theme is section-scoped, not OS-driven.** The site is light-primary; the dark
-"proof zones" are applied to the demo sections regardless of the visitor's OS
-setting. Do **not** flip the whole site to dark on `prefers-color-scheme: dark`
-(full OS-driven theming was considered and declined) — dark is a deliberate
-art-directed register for the proof sections, not a user preference toggle.
-
-Non-negotiable: WCAG AA verified, `prefers-reduced-motion` respected,
-focus-visible accent rings, self-hosted subset variable fonts, compositor-only motion.
+Non-negotiable: WCAG AA verified as a build-time gate, `prefers-reduced-motion`
+respected, focus-visible rings, self-hosted subset variable fonts,
+compositor-only motion (`transform` / `opacity` / `clip-path`).
 
 ## Structure & Narrative Flow
 
-The locked section sequence for the single-page scroll. Derived from the
-scroll-driven showcase-funnel pattern in `docs/STRUCTURE.md`, but **inverted**:
-that reference hides capability behind a parody and withholds its ask until a
-late rug-pull; this site *leads with real capability sincerely* and lets it
-compound. Same scroll grammar (hook → demos → offers → close), opposite honesty.
+**Full spec: `docs/superpowers/specs/2026-07-28-latest-v2-robot-design.md`.**
 
-### Funnel logic
+One screen. `100dvh`. No page scroll, no nav, no sections.
 
-**Live ML demos build trust → priced offers convert → one free discovery call
-closes.** Proof precedes pitch; the pitch is only credible because the proof
-already landed. The scroll walks the visitor from *"who is this?"* → *"this
-person actually ships production ML"* → *"here's what I can buy, and for how
-much"* → *"booking a call is low-risk and obvious."* Do not reorder demos after
-offers — trust must be earned before value is priced.
+### Composition — asymmetric marquee
 
-### Section order (locked)
+Not a centred hero. Following Apple's product marquee: subject upper, type
+bottom-left, floating action card bottom-right.
 
-| # | Section | Register | Rationale (placement + transition) |
-|---|---------|----------|-----------------------------------|
-| 1 | **Sticky nav** — wayfinding anchors + *de-emphasized* "Book a call" text link | light (glass) | Orientation only; the loud ask is withheld to the close. Overlays all below. |
-| 2 | **Hero** — positioning headline (production-grade AI, not prototypes), subhead, soft "scroll to proof" cue (no hard CTA) | light | Hook + value prop in one screen; sets "senior, in control." → "claims aren't proof — watch." |
-| 3 | **Credential strip** — "7+ yrs shipping to production" + employers | light, quiet | Instant authority anchor before the demos; deliberately quiet to contrast the loud beat next. → hinge to dark. |
-| 4 | **Proof zone — live demos** (CLIP classifier + SegFormer/SAM2 segmentation), Geist Mono readouts (model, latency, confidence) | **dark** | Trust core and emotional apex; "the demo IS the proof." No CTA here. → back to light: "here's what you can buy." |
-| 5 | **Services — priced ladder** ($199 → $497 → $897+ → $8,997), flagship anchored, prices shown, no per-card CTA | light | Funnel's "offers convert" step, placed right after the trust peak. Prices visible to qualify leads. → "what the engagement is like." |
-| 6 | **How it works** — shared 3-step (discovery → build/evaluate → deploy & hand over) + de-riskers (your cloud, IaC, docs, no-risk guarantee) | light, quiet | Removes purchase risk for the B2B buyer. → to the human. |
-| 7 | **About — seasoning** — engineer-first; physics + ex-documentary/TV as texture; remote Freiberufler | light, quiet | Humanizes late so it never dilutes the engineering lead (per `CONTEXT.md`). → to the close. |
-| 8 | **Final CTA / close** — *the* single emphatic ask: free discovery call + no-risk guarantee | light, **warm accent zone** | The earned conversion moment; everything above set it up. |
-| 9 | **Footer** — contact, LinkedIn, legal, remote/timezone | light | Secondary conversion + trust details. |
+```text
+┌─ 100dvh ─────────────────────────────────────────────┐
+│                  ╭──────────╮                        │  full-bleed canvas,
+│                  │  ROBOT   │                        │  robot in upper ~60%,
+│                  ╰──────────╯                        │  biased right
+│                                                      │
+│  Alejandro Guirau                    ← tagline       │
+│  Freelance AI engineer.              ← headline,     │
+│  Production systems, not prototypes.   gradient      │
+│                              ╭─────────────────────╮ │
+│  LinkedIn   GitHub           │ Services  ( Contact )│ │
+│                              ╰─────────────────────╯ │
+│  Alejandro Guirau - Software Consulting              │
+└──────────────────────────────────────────────────────┘
+```
 
-### High-weight scroll moments
+The robot canvas is a `position: fixed` full-bleed backdrop; the marquee grid
+overlays it. Below 900px everything stacks and centres.
 
-Exactly two motion set-pieces, mapped 1:1 to the locked style's signature moments:
+### Why the links split
 
-1. **Hero staged reveal** (§2) — calm-confident entrance.
-2. **Light → dark proof-zone hinge into the live demos** (§4) — the *claim → proof*
-   pivot. **This is the emotional apex.**
+Two different jobs, so two different weights:
 
-The **close** (§8) is a *third emotional beat* but carries its weight through
-**composition and accent colour, not scroll motion** — no third motion set-piece
-(the style supports only two). Everything else (credential strip, ladder,
-process, about, footer) stays quiet by contrast.
+- **bottom-left, quiet** — LinkedIn, GitHub. Credentials. A visitor verifying
+  you goes looking for these; they do not need to be loud.
+- **bottom-right, in the raised card** — Services as a text link, Contact as the
+  blue pill. Apple's "From $1,599" + "Buy" pairing: context beside the single
+  committed action.
+
+Conversion gets one unambiguous target.
 
 ### Where conversion lands
 
-Single, delayed, emphatic: **book a free discovery call** at **§8**, set up by
-proof (§4) → priced offers (§5) → de-risk (§6) → human (§7). No repeated loud
-CTAs; the nav's de-emphasized link is the only mid-scroll safety valve for an
-already-convinced visitor.
+Single and emphatic: **Contact**, the only blue pill on the page. Services is
+the supporting context beside it. Both open native `<dialog>` modals; LinkedIn
+and GitHub leave the page.
+
+### Motion
+
+Exactly two moments, unchanged: the **staged text reveal** and the **one-shot
+dolly-out** (3.7s, `cubic-bezier(0.16, 1, 0.3, 1)`). Apple's product-page motion
+is scroll-driven and does not port to a single screen. Everything else is a
+150ms hover/focus transition.
 
 ### Swappable-for-niching blocks
 
-Keep these **content-only** so a future niche re-skin (candidate niches: creator
-economy, performance marketing — see `CONTEXT.md`) never touches structure or
-sequence: hero headline/subhead (§2), credential framing (§3), offer-card copy
-(§5), about angle (§7). The `--accent`-driven CTA, section order, and the
-light → dark → light rhythm are fixed regardless of niche.
+Content-only, so a future niche re-skin (creator economy, performance marketing
+— see `CONTEXT.md`) never touches structure: the headline and tagline, and the
+Services dialog copy. Fixed regardless of niche: the marquee composition, the
+link split, the accent-driven Contact pill, and the footer legal string.
 
-> **Content note:** pull all words/numbers from `CONTENT.md`. The employer list
-> in §3 is a swappable block and **Santander is gated** — confirm before it ships
-> publicly (see Cautions).
-
+> **Content note:** pull all words/numbers from `CONTENT.md`. **Santander is
+> gated** — held back, confirm before it ships publicly (see Cautions).
 ## Positioning & Copy Strategy
 
 Durable strategy for the build. The *words and numbers* live in `CONTENT.md`
@@ -263,18 +228,21 @@ that govern how those words are framed and where they may be swapped.
 - **Broad now, niche later.** Audience is generic (any business needing production
   AI apps, agents, automations). Niche re-skins come later — candidates: creator
   economy, performance marketing (variant copy in `docs/variants/`).
-- **Swappable-for-niching blocks (content-only, never structural):** hero
-  headline/subhead (§2), credential framing (§3), offer-card copy (§5), about
-  angle (§7). **Fixed regardless of niche:** the `--accent`-driven CTA, the locked
-  section order, and the light → dark → light rhythm.
+- **Swappable-for-niching blocks (content-only, never structural):** the headline
+  and tagline, and the Services dialog copy. **Fixed regardless of niche:** the
+  marquee composition, the link split, the accent-driven Contact pill, and the
+  footer legal string.
 
 ### Core differentiator (thread everywhere)
 
 **Production-grade engineering — real trained ML and deployed systems, not
 prototypes or no-code patchwork.** It is the site's whole reason to be believed.
-Geist Mono is its typographic tell: evidence (model names, readouts, real output)
-*is* the ornament. Do not dilute it — every section should reinforce "this person
-ships production ML," not "this person knows about AI."
+
+In v2 the proof is the robot itself: a real WebGL humanoid, rigged and animated,
+rather than a stock illustration. It has to carry the claim that the nine-section
+funnel's live ML demos used to carry, which is why its fidelity is specified so
+tightly in the build spec. Geist Mono remains the typographic tell, now scoped to
+prices and durations in the Services dialog.
 
 ### Copy & tone rules
 
@@ -285,40 +253,61 @@ ships production ML," not "this person knows about AI."
   preserve that text verbatim where it renders as copy, and let heading
   label/subtitle dashes resolve into layout (two typographic elements) rather than
   editing them. Never add a new em-dash.
-- **One conversion.** Every offer's CTA is the free discovery call; the single
-  emphatic ask lands once at §8. Booking is wired to a single `#book` placeholder
-  anchor, swappable in one place when a real scheduler URL exists.
+- **One conversion.** The single emphatic ask is **Contact** — the only blue pill
+  on the page. The Services dialog presents the offers and their prices, but
+  carries no per-card CTA; every path ends at the same contact form.
 
-### Funnel role per section
+### Funnel role
 
-Funnel logic: **live-demo proof builds trust → priced offers convert → one free
-discovery call closes.** Proof precedes pitch. The per-section roles, registers,
-and placement rationale are specified in **Structure & Narrative Flow** above
-(the locked section table) — that table is the authority; do not duplicate or
-drift from it here.
+v2 compresses the funnel into one screen. The robot builds trust, Services
+prices the work, Contact closes. Proof still precedes pitch — the visitor sees
+the robot before they can read a price — but the sequence is now spatial rather
+than scrolled. The composition and link hierarchy are specified in **Structure &
+Narrative Flow** above; that section is the authority.
 
 ## Tech & deployment
 
-- **Stack:** a React app built with **Next.js (App Router)**, **Tailwind CSS**, and
-  **shadcn/ui**; Geist self-hosted via `next/font`. Prefer server components and
-  static rendering; add client interactivity only where a section needs it, and
-  pull in only the shadcn components actually used. (Not yet scaffolded — see
-  Current status.)
-- **Deploy:** **Vercel**, Git-connected — preview deploy per push, production on
-  `main`. Only the build output is served, so planning docs are not published as a
-  side effect of deploying.
-- New frontend work should follow production-quality standards: semantic HTML,
-  design tokens over hardcoded values, compositor-friendly motion, accessibility,
-  and the landing-page performance budget (JS < 150kb, CSS < 30kb gzipped).
+- **Stack:** static HTML, CSS and ES modules. **No framework, no build step at
+  deploy time.** Three.js is vendored as a committed, pre-bundled artifact so the
+  host never has to run a build. Geist is self-hosted directly. There is no
+  Next.js, no Tailwind, and no shadcn/ui in v2 — the page is one screen with two
+  dialogs and a WebGL canvas, and a framework would cost more than it returns.
+- **Deploy:** **GitHub Pages**, via `.github/workflows/static.yml` on push to
+  `main`. The workflow uploads the **entire repository** verbatim (`path: '.'`)
+  with no build step, which has two consequences that govern everything else:
+  1. Anything committed is published. `docs/reference/` is gitignored for exactly
+     this reason (third-party screenshots must never ship).
+  2. Committed build artifacts must not go stale — see the staleness rule in the
+     build spec §3.1.
+- **Root-readiness:** v2 is built to be promotable to the site root without
+  rework, because business verification inspects the home page (see Cautions).
+- Standards: semantic HTML, design tokens over hardcoded values,
+  compositor-friendly motion, accessibility, and a landing-page budget of
+  **JS < 150kb, CSS < 30kb** gzipped.
 
 ## Cautions / open questions
 
-- **Retire the old GitHub Pages workflow.** `.github/workflows/static.yml` still
-  uploads the **entire repository** (`path: '.'`) to GitHub Pages, which would serve
-  `docs/` (pricing, strategy) and `_legacy/` publicly. It is superseded by the
-  Vercel deploy — disable or delete it before launch so the two don't both publish.
-  Vercel serves only the build output; use `.gitignore` / deploy-ignore for anything
-  that must never ship.
-- **Employer list is not settled.** `CONTEXT.md` says to *confirm Santander before
-  it ships publicly*, while `CONTENT.md` lists it. Do not treat the credentials
-  list as final; confirm before anything goes public.
+- **`static.yml` publishes the whole repo.** `path: '.'` with no build step means
+  every committed file is served, including `docs/`. This is the deploy path for
+  v2, so it must not simply be deleted — but before launch, decide what to do
+  about `docs/` being publicly reachable (pricing and strategy are in there).
+  Options: move the site into a subdirectory and set `path:` to it, or accept
+  publication and scrub `docs/`. Not yet decided.
+- **Meta business verification reads the home page.** The footer legal string
+  `Alejandro Guirau - Software Consulting` must render as real text, with a plain
+  hyphen-minus, matching the root `index.html` character-for-character (it is
+  there at lines 4, 24 and 385). A footer at `/latest/v2/` does nothing for
+  verification until v2 is promoted to root.
+- **Promoting v2 to root replaces the live v0 site.** v0 is currently deployed
+  and is what Meta is verifying against right now. Do not promote v2 without
+  carrying over, and re-verifying: the legal string, the Meta domain-verification
+  meta tag, the canonical URL, and the favicon. Recent history shows a deliberate
+  revert *back* to v0 for verification, so treat root as load-bearing.
+- **v1 is built but undocumented here.** `latest/v1/` is a complete Next.js +
+  Tailwind implementation of the nine-section funnel. This file used to describe
+  it; those sections now describe v2. If v1 is ever revived, recover its design
+  system and section blueprint from git history (before the v2 rewrite) rather
+  than reconstructing them.
+- **Employer list is not settled.** `CONTEXT.md` says to *confirm Santander
+  before it ships publicly*, while `CONTENT.md` lists it. Resolved for now:
+  **Santander is held back.** Confirm before anything goes public.

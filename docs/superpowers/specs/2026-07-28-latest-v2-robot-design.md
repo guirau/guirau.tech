@@ -28,26 +28,37 @@ exactly one conversion path: the Contact dialog.
 
 ## 2. Page structure
 
-One screen. `100dvh`. No page scroll.
+One screen. `100dvh`. No page scroll. **Asymmetric marquee** composition,
+following Apple's product page — see `docs/DESIGN-SYSTEM.md` §5 for the full
+rationale and CSS.
 
 ```text
-┌─ 100dvh ───────────────────────────────────┐
-│              [ ROBOT CANVAS ]              │  flex: 1, min-height: 0
-│ ·········································· │
-│             Alejandro Guirau               │  name
-│    Freelance AI engineer.                  │  positioning (swappable)
-│    Production systems, not prototypes.     │
-│   LinkedIn · GitHub · Services · Contact   │  links
-│    Alejandro Guirau - Software Consulting  │  footer, 13px, tertiary
-└────────────────────────────────────────────┘
+┌─ 100dvh ─────────────────────────────────────────────┐
+│                  ╭──────────╮                        │  canvas is a fixed
+│                  │  ROBOT   │                        │  full-bleed backdrop;
+│                  ╰──────────╯                        │  robot upper ~60%,
+│                                                      │  biased right
+│  Alejandro Guirau                    ← tagline, 600  │
+│  Freelance AI engineer.              ← headline,     │
+│  Production systems, not prototypes.   gradient, 600 │
+│                              ╭─────────────────────╮ │
+│  LinkedIn   GitHub           │ Services  ( Contact )│ │
+│                              ╰─────────────────────╯ │
+│  Alejandro Guirau - Software Consulting              │  footer, 13px, secondary
+└──────────────────────────────────────────────────────┘
 ```
 
 `100dvh` and not `100vh`: `vh` excludes the mobile address bar, which pushes
 the links and footer below the visible area on phones.
 
-The text block is fixed-height; the canvas is `flex: 1` and absorbs the
-remainder, so the robot is always as large as the device allows and the type
-is never displaced.
+The canvas is `position: fixed; inset: 0` and sits behind everything at
+`z-index: 0`; the marquee is a `z-index: 1` grid overlaying it. The robot is
+therefore never displaced by the text — it is framed *around* it by the camera
+bias in §6.1. Below 900px the grid collapses to a single centred column.
+
+The four links split by job rather than sitting in one flat row: LinkedIn and
+GitHub are quiet credentials bottom-left; Services and Contact live in the
+raised card bottom-right, with Contact as the only accent pill on the page.
 
 ### 2.1 Positioning line
 
@@ -72,7 +83,9 @@ match, and the root `index.html` uses the hyphen. Requirements:
 - real text in a `<footer>` element; never an image, never `display: none`,
   never a visually-hidden utility class
 - inside the `100dvh` block, legible **without scrolling** on every breakpoint
-- de-emphasized (13px, tertiary colour) but never hidden
+- de-emphasized (13px, `--text-secondary`) but never hidden. There is no
+  tertiary tier in the v2 palette; `--text-secondary` measures 5.80:1 on black,
+  so the footer is visually quiet *and* fully legible (see `DESIGN-SYSTEM.md` §1.2)
 
 The legal name additionally appears in `<title>` and in a JSON-LD
 `ProfessionalService` block (~200 bytes) carrying legal name, URL and email.
@@ -390,17 +403,46 @@ Model units (1.8 tall, feet at origin):
 | End — full body | `(0, 1.00, 3.50)` | `(0, 1.00, 0)` |
 | End — chest-up | `(0, 1.45, 1.50)` | `(0, 1.45, 0)` |
 
-**End framing is chosen from the canvas's own measured height, not the
-window's** — the canvas is flex-derived and unknown until the text block
-measures.
+The canvas is now full-viewport (§2), so end framing keys off **viewport
+height** directly:
 
 ```
-canvasHeight < 420px  ->  chest-up
-otherwise             ->  full body
+viewportHeight < 620px  ->  chest-up
+otherwise               ->  full body
 ```
 
 Re-evaluated on resize. This is the detail that looks correct at 1440 and
 breaks at 390.
+
+#### Off-axis bias
+
+The marquee is asymmetric, so the robot must sit right-of-centre and high.
+**Do not rotate the camera to achieve this** — that skews the perspective and
+the helmet reads as tilted. Shift `camera.position` **and** the lookAt target by
+the same vector, which is a pure lateral translation: framing moves, projection
+does not.
+
+Express the shift as a fraction of the visible extent at the subject plane so it
+holds across aspect ratios:
+
+```js
+const visibleH = 2 * Math.tan((fov * Math.PI / 180) / 2) * distance;
+const visibleW = visibleH * (canvasW / canvasH);
+const bias = { x: -kx * visibleW, y: -ky * visibleH };
+// added to both camera.position and the lookAt target, every frame of the dolly
+```
+
+Negative `camera.x` pushes the robot **right** in frame; negative `camera.y`
+pushes it **up**.
+
+| Breakpoint | `kx` | `ky` |
+|---|---|---|
+| ≥900px | `0.12` | `0.10` |
+| <900px | `0` | `0.06` |
+
+Both are starting values to tune against the real mesh — the model's bounding
+box is not symmetric about its origin once the arms are posed, so the visual
+centre and the pivot do not coincide.
 
 ### 6.2 Blink
 
@@ -451,7 +493,8 @@ head-turn and arm sway. Two of four behaviours, degraded rather than broken.
 - `prefers-reduced-motion` pass
 - Keyboard: Tab through links, open/close both dialogs, focus returns to
   trigger, Esc closes
-- WCAG AA contrast on all text including the tertiary footer
+- WCAG AA contrast on all text including the footer; every pairing in
+  `DESIGN-SYSTEM.md` §1.3 re-verified against the shipped CSS
 - Unit tests on the four behaviours (pure functions, no WebGL)
 - Measured gzipped transfer sizes against §3.3
 - Contact form: verified end-to-end delivery to the target inbox
