@@ -118,6 +118,20 @@ Carried over from the HIG and confirmed by the marketing page: blue appears on
 interactive elements only. On v2 that is exactly two places — the Contact pill,
 and text links. Nothing decorative is blue.
 
+**The `--accent` ban is a property ban, not a token ban.** WCAG sets two
+thresholds, and `#0071E3` on black lands between them at 4.47:1:
+
+| Property | Threshold | `--accent` on `--surface-0` | Verdict |
+|---|---|---|---|
+| `color` (text) | 4.5:1 — SC 1.4.3 | 4.47:1 | **forbidden** |
+| `background-color` (fill) | n/a — judged by `--on-accent` | — | permitted |
+| `outline-color`, `border-color` | 3:1 — SC 1.4.11 | 4.47:1 | **permitted** |
+
+So `outline: 2px solid var(--accent)` is legitimate, and is in fact the focus
+ring §6 specifies. Only `color: var(--accent)` is out; `--accent-text`
+(`#2997FF`, 6.97:1) is the text colour. The §7 gate greps the *declaration*
+`color: var(--accent)`, not the bare token, for exactly this reason.
+
 ---
 
 ## 2. Typography
@@ -190,16 +204,39 @@ values here.
 
 v2 is one screen, so it needs six roles, not a full ramp.
 
-| Token | Size | Weight | Colour |
-|---|---|---|---|
-| `--text-eyebrow` | `clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem)` 22→28px | 600 | `--text-secondary` |
-| `--text-headline` | `clamp(2.5rem, 1.2rem + 5.6vw, 4rem)` 40→64px | 600 | gradient (§3) |
-| `--text-body` | `1.0625rem` 17px | 400 | `--text-primary` |
-| `--text-link` | `1.0625rem` 17px | 400 | `--accent-text` |
-| `--text-caption` | `0.8125rem` 13px | 400 | `--text-secondary` |
-| `--text-mono` | `0.8125rem` 13px | 500 | `--text-secondary` |
+| Token | Size | Weight | Line height | Colour |
+|---|---|---|---|---|
+| `--text-eyebrow` | `clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem)` 22→28px | 600 | `1.19` | `--text-secondary` |
+| `--text-headline` | `clamp(2.5rem, 1.2rem + 5.6vw, 4rem)` 40→64px | 600 | `1.08` | gradient (§3) |
+| `--text-body` | `1.0625rem` 17px | 400 | `1.47` | `--text-primary` |
+| `--text-link` | `1.0625rem` 17px | 400 | `1.47` | `--accent-text` |
+| `--text-caption` | `0.8125rem` 13px | 400 | `1.43` | `--text-secondary` |
+| `--text-mono` | `0.8125rem` 13px | 400 | `1.43` | `--text-secondary` |
 
 17px is the body floor, held from the HIG. **[measured]**
+
+**Line height, unlike tracking, ports directly.** **[measured]** §2.3 refuses to
+copy Apple's tracking because those numbers are an artifact of SF Pro's optical
+sizing. Leading carries no such baggage — it is a ratio applied to the em box,
+and the em box is the same shape in Geist. So these come across close to face
+value rather than as starting points to tune.
+
+Apple's observed curve: display 1.07–1.19, body 1.47, caption 1.43. The shape of
+it is the point — **leading tightens as size grows.** Their 56px hero runs 1.07
+and their 21px tagline runs 1.19, so our 40→64px headline takes `1.08` and our
+22→28px eyebrow takes `1.19`. Body and caption are lifted unchanged.
+
+One Apple value is deliberately not taken: their footer link columns run an
+unusually relaxed `2.41`. That exists to make dense multi-column link stacks
+scannable. v2's footer is a single legal line, so the caption ratio applies.
+
+**`--text-mono` drops from 500 to 400.** **[derived]** Apple's weight ladder is
+300 / 400 / 600 / 700 with **500 deliberately absent** — mid-weight readings
+always resolve to 600. Since §2.2 already commits to that ladder, keeping mono
+at 500 would be the one token contradicting the rule that makes the rest of the
+system read as premium. Geist Mono at 400 is optically heavier than Geist Sans
+at 400 anyway (monospace faces widen to fill the advance), so 400 already reads
+with the emphasis 500 was reaching for.
 
 The caption is 13px rather than Apple's measured 12px. **[derived]** — that
 row is the footer legal string, which a business-verification reviewer has to
@@ -493,6 +530,45 @@ framing, text appears at full opacity, the robot holds a static pose.
 No easing value here is claimed as measured from Apple. We did not measure their
 easing curves.
 
+### 6.1 Interaction states
+
+Three states, and they are the whole vocabulary. **[measured]**
+
+```css
+/* Press — the system-wide micro-interaction, on every button and link. */
+.pill:active,
+.link:active { transform: scale(0.95); }
+
+/* Focus — see §1.4: --accent is legal as a ring at 4.47:1 (3:1 threshold). */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Hover — see the deviation note below. */
+.pill:hover { background-color: var(--accent-hover); }
+.link:hover { opacity: 0.8; }
+```
+
+`scale(0.95)` is Apple's press state on *every* button in their system, and it
+fits our constraints exactly: `transform` is compositor-only, so it costs
+nothing per frame and needs no exception in the reduced-motion path (a 150ms
+scale on deliberate press is feedback, not decoration).
+
+`outline-offset: 3px` is **[derived]**, not measured — the ring needs to clear
+the 980px pill radius or it reads as a second border.
+
+**Deviation: we document hover; Apple does not.** Their system says *default and
+active/pressed states only*, which is right for a page of hundreds of components
+where hover states multiply into an unmaintainable matrix — and where half the
+traffic is touch, which has no hover at all. v2 has four interactive elements.
+The matrix is four rows, and a pill that does not respond to the pointer on a
+page this sparse reads as broken rather than restrained. Recorded here so the
+divergence is a decision rather than an oversight.
+
+Note that hover cannot darken the pill: `--on-accent` sits at 4.70:1 with almost
+no headroom, so `--accent-hover` goes lighter (§1.1).
+
 ---
 
 ## 7. Launch gates
@@ -500,17 +576,19 @@ easing curves.
 Verifiable, not aspirational. Each must be checked before v2 ships.
 
 - [ ] Every pairing in §1.3 re-verified against the shipped CSS
-- [ ] `color: var(--accent)` appears nowhere in the codebase
+- [ ] The declaration `color: var(--accent)` appears nowhere in the codebase.
+      Grep the property, not the token — `outline: 2px solid var(--accent)` is
+      the specified focus ring and must survive this check (§1.4)
 - [ ] Gradient headline renders as solid `--text-primary` with
       `background-clip` disabled, and in `forced-colors: active`
 - [ ] Gradient headline never renders below 40px at any breakpoint
 - [ ] No `box-shadow` anywhere
-- [ ] No font-weight 700 anywhere
-- [ ] Footer legal string is real text, legible without scrolling, at every
-      breakpoint from 320px up
-- [ ] Footer legal string copies out of the rendered page byte-identical to the
-      root `index.html` version, plain hyphen-minus intact (§5.1 disables font
-      features on the footer; confirm nothing re-enables them)
+- [ ] No font-weight 700 anywhere, and no font-weight 500 (§2.4)
+- [ ] Footer legal string is real text, legible without scrolling at every
+      breakpoint from 320px up, and copies out of the rendered page
+      byte-identical to the root `index.html` version with the plain
+      hyphen-minus intact (§5.1 disables font features on the footer;
+      confirm nothing re-enables them)
 - [ ] Headline wraps to 2–3 lines at 1440px / 1024px / 768px and clears the
       robot's feet at the tallest wrap; `max-width` recorded in §2.5
 - [ ] Every interactive target ≥44×44px
@@ -539,3 +617,72 @@ budget. Taking more than its grammar would be a mistake.
 - **Alpha-white text (`rgba(255,255,255,0.92)`).** Apple needs it because type
   sits over varying photography. Our type sits over flat black, so a solid
   token is both simpler and more predictable.
+
+---
+
+## 9. Reconciliation with `apple_design_system_web.md`
+
+`docs/support/apple_design_system_web.md` is a third-party analysis of Apple's
+marketing site (MIT, VoltAgent). It arrived *after* this file was measured, so
+it functions as an independent second observation of the same source. That makes
+it useful in a specific way: where it agrees, it is corroboration by a party who
+could not have copied us; where it disagrees, the disagreement is diagnostic.
+
+**Scope limit, stated once.** Its own Known Gaps section concedes that what it
+documents is *"the daytime/light-dominant variant Apple ships by default"* and
+that the dark variants were not surfaced. It therefore **cannot govern v2's dark
+treatment**, and nothing in it should be read as authority over §1. Its light
+palette, 18px card radius, 80px section padding, and tile-alternation rhythm are
+all out of scope for a single dark screen.
+
+### 9.1 Corroborated — arrived at independently, same answer
+
+| Finding | Their observation | Ours |
+|---|---|---|
+| **The dark-surface blue split** | `#2997ff`, named for use *"where Action Blue would disappear"* on dark tiles | `--accent-text: #2997FF`, derived from contrast math alone (§1.1) |
+| Display weight | ladder 300/400/600/700; *"mid-weight readings always use 600"* | 600 everywhere, never 700 (§2.2) |
+| Body size | 17px, *"not 16px"* | 17px floor (§2.4) |
+| No gradient tokens | zero in their palette | one gradient, scoped to the headline (§3) |
+| Pill radius on primary CTA | pill | `--radius-pill: 980px` (§4.1) |
+| Touch targets | 44×44 | 44×44 (§7) |
+| Button padding | 11px × 22px | measured 11px × 21px |
+| Elevation | *"exactly one drop-shadow in the entire system,"* reserved for product photography; UI elevation comes from surface-colour change | no `box-shadow` at all; depth from luminance delta (§4.2) |
+| Single accent | *"non-negotiable"* | §1.4 |
+
+The `#2997FF` row is the strongest validation in the file. Two observers, one
+working from contrast arithmetic and one from a palette audit, split Apple's
+blue into fill and dark-surface-text variants at the same hex.
+
+Their "Note on Font Substitutes" also supports §2.1 and §2.3 without meaning to:
+it concedes that non-Apple platforms need Inter (i.e. `-apple-system` does not
+deliver SF off-Apple, which is exactly why we rejected the system stack), and it
+prescribes a `-0.01em` tracking nudge *specific to Inter* — conceding that
+Apple's tracking numbers are not portable across typefaces. We keep Geist; the
+substitute recommendation is cited as support, not adopted.
+
+### 9.2 Conflicts — recorded, and how each resolves
+
+| Point | Them | Us | Resolution |
+|---|---|---|---|
+| Accent hex | `#0066CC` "Action Blue"; `#0071E3` demoted to "Focus Blue" | `--accent: #0071E3` | **Ours.** We measured `#0071E3` as the button fill on the actual target page (MacBook Pro). Theirs is a cross-page average over five surfaces. Different sampling, and ours is the page we are deriving from. |
+| Mono weight | 500 absent from the ladder | was 500 | **Theirs.** Resolved in §2.4 — `--text-mono` is now 400. |
+| Card radius | 18px, utility grid cards | 28px | **Both.** Different surfaces. Their 18px is a dense card in a 3–5 column grid; our 28px is a single floating marquee card, measured on Apple's own. |
+| Stack breakpoint | 834px structural | 900px | **Ours, informed.** Their observed value is noted beside ours so the choice reads as considered. 900px is where our marquee's two columns stop fitting, which is a property of our composition, not theirs. |
+| Hover states | *"Never document hover"* | documented | **Ours, as a stated deviation.** Reasoning in §6.1. |
+
+### 9.3 One finding that changed our confidence, not our design
+
+Their footer spec puts the legal row at 12px `{colors.ink-muted-48}` (`#7a7a7a`)
+on `{colors.canvas-parchment}` (`#f5f5f7`). Computing that pairing:
+
+```
+L(#7a7a7a) = 0.1946      L(#f5f5f7) = 0.9143
+ratio = (0.9143 + 0.05) / (0.1946 + 0.05) = 0.9643 / 0.2446 = 3.94:1
+```
+
+**Apple's own footer legal fine print fails WCAG AA for normal text** (3.94:1
+against a 4.5:1 requirement). §2.4 already set our caption to 13px rather than
+their 12px, tagged **[derived]**, on the reasoning that a business-verification
+reviewer has to read that exact string. This computation retroactively justifies
+that call: the thing we declined to copy is measurably the weakest point in the
+system we were copying from. Our footer runs 13px at 5.80:1 and passes.
