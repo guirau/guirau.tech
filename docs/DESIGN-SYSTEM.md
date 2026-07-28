@@ -540,19 +540,25 @@ The card loses its float and becomes a full-width block above the footer.
 
 ## 6. Motion
 
-Unchanged from the build spec — Apple's product-page motion is scroll-driven
-and v2 has no scroll, so there is nothing to port.
+Apple's product-page motion is scroll-driven and v2 has no scroll, so there is
+nothing to port. Two moments only: the **intro sequence** and the marquee
+reveal that follows it.
 
-Two moments, both already specified: the staged text reveal and the one-shot
-dolly-out. `cubic-bezier(0.16, 1, 0.3, 1)`, 3.7s.
+**Timings are not restated here.** The build spec §6.1 owns the phase table,
+the easing per phase, and the reduced-motion end state; this file owns how
+things are *drawn*, not when they move (`CLAUDE.md`, documentation hierarchy).
+An earlier version of this section described a single 3.7s
+`cubic-bezier(0.16, 1, 0.3, 1)` dolly and a reduced-motion state with no face.
+Both were superseded when the intro sequence was designed — the move is now
+3.5s in four phases with the expo curve demoted to the settle, and
+reduced-motion renders the *composited* end state with the face still faintly
+visible. Cite §6.1, never this paragraph.
 
 Everything else is a 150ms hover or focus transition. Compositor-friendly
-properties only — `transform`, `opacity`, `clip-path`. Full
-`prefers-reduced-motion` fallback: the dolly resolves instantly to its end
-framing, text appears at full opacity, the robot holds a static pose.
+properties only — `transform`, `opacity`, `clip-path`.
 
-No easing value here is claimed as measured from Apple. We did not measure their
-easing curves.
+No easing value in the system is claimed as measured from Apple. We did not
+measure their easing curves.
 
 ### 6.1 Interaction states
 
