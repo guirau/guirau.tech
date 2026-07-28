@@ -58,7 +58,7 @@ Everything below is a modification to working, tested code from Plan 2. Nothing 
 | File | Responsibility |
 |---|---|
 | `latest/v2/src/tools/split-rig.py` | Blender headless script: split the fused mesh, set pivots, parent, normalize, re-export. The single most complex artifact in this plan. |
-| `latest/v2/src/tools/verify-glb.mjs` | Machine checks on any GLB: hierarchy, height, origin, facing, polycount. Run against both the placeholder and the real asset. |
+| `latest/v2/src/tools/verify-glb.mjs` | Machine checks on any GLB that do not depend on node transforms: hierarchy, duplicate names, parenting, polycount. Run against both the placeholder and the real asset. Dimensions are gated in `split-rig.py` instead — see Task 1 Step 2. |
 | `latest/v2/src/tools/capture-poster.mjs` | Screenshots the settled frame with the marquee suppressed. A build tool, not a test. |
 | `latest/v2/assets/robot.glb` | **Replaces** the placeholder. Same path, same contract. |
 | `latest/v2/assets/robot-poster.webp` | Static composited final frame for the no-WebGL and reduced-motion paths. |
@@ -130,40 +130,19 @@ const looseParts = root.listNodes()
   .map((n) => n.getName());
 if (looseParts.length) failures.push(`unparented: ${looseParts.join(', ')}`);
 
-// --- Bounds: 1.8 units tall, origin at the feet, facing +Z ---
-let min = [Infinity, Infinity, Infinity];
-let max = [-Infinity, -Infinity, -Infinity];
+// --- Polycount ---
 let triangles = 0;
-
 for (const mesh of root.listMeshes()) {
   for (const prim of mesh.listPrimitives()) {
     const position = prim.getAttribute('POSITION');
-    if (position) {
-      const pMin = position.getMinNormalized([]);
-      const pMax = position.getMaxNormalized([]);
-      min = min.map((v, i) => Math.min(v, pMin[i]));
-      max = max.map((v, i) => Math.max(v, pMax[i]));
-    }
     const indices = prim.getIndices();
     triangles += indices ? indices.getCount() / 3 : (position?.getCount() ?? 0) / 3;
   }
 }
-
-const height = max[1] - min[1];
-if (Math.abs(height - 1.8) > 0.02) {
-  failures.push(`height ${height.toFixed(3)} != 1.80 (tolerance 0.02)`);
-}
-if (Math.abs(min[1]) > 0.02) {
-  failures.push(`feet at y=${min[1].toFixed(3)}, expected 0 — origin is not at the feet`);
-}
-if (Math.abs((min[0] + max[0]) / 2) > 0.05) {
-  failures.push(`not centred on X: midpoint ${((min[0] + max[0]) / 2).toFixed(3)}`);
-}
-
 if (triangles > 45000) failures.push(`${Math.round(triangles)} triangles exceeds the 40k target + slack`);
 
 console.log(`${path}`);
-console.log(`  height ${height.toFixed(3)}  feet y=${min[1].toFixed(3)}  tris ${Math.round(triangles)}`);
+console.log(`  nodes ${root.listNodes().length}  tris ${Math.round(triangles)}`);
 
 if (failures.length) {
   console.error('\nFAIL:');
@@ -173,13 +152,26 @@ if (failures.length) {
 console.log('  OK');
 ```
 
+> **Why this script does not measure height, feet or centring.** Those are
+> *world*-space facts, and a glTF accessor's `min`/`max` are **local** to its own
+> primitive. On a single unsplit mesh at identity the two coincide, so a bounds
+> check here would appear to work — and then silently lie the moment Task 6 splits
+> the model, because `origin_set` rewrites each part's vertices around its joint
+> pivot and moves the offset onto the node translation. Unioning `Head`'s
+> neck-relative box with `Torso`'s waist-relative box yields a number that is not
+> the robot's height and not anything else either. Composing world matrices here
+> would be possible but duplicates work `split-rig.py` already does correctly in
+> Blender, where the coordinates are unambiguous. **The bounds assertion lives in
+> `split-rig.py` (Task 6); this script owns only the transform-independent
+> checks** — hierarchy, duplicates, parenting, polycount.
+
 - [ ] **Step 3: Verify it against the placeholder**
 
 ```bash
 cd latest/v2 && node src/tools/verify-glb.mjs assets/robot.glb
 ```
 
-Expected: the placeholder passes hierarchy and parenting. **It may fail the height check** — the primitive was built to roughly 1.8 units, not exactly. That is fine and informative: it proves the check has teeth. Note the result; the generated asset must pass all of it.
+Expected: `OK`. The placeholder was built to the §4.1 hierarchy, so every check here should pass on it. If it does not, the placeholder is wrong — fix it before generating anything, because Plan 2's runtime is bound to that same contract.
 
 - [ ] **Step 4: Create the generation log**
 
@@ -415,14 +407,19 @@ def import_glb(path):
     return bpy.context.view_layer.objects.active
 
 
+def world_bounds(objs):
+    """Axis-aligned world bounds over one or more objects, in Blender Z-up."""
+    corners = [o.matrix_world @ Vector(c) for o in objs for c in o.bound_box]
+    min_v = Vector((min(c.x for c in corners), min(c.y for c in corners), min(c.z for c in corners)))
+    max_v = Vector((max(c.x for c in corners), max(c.y for c in corners), max(c.z for c in corners)))
+    return min_v, max_v
+
+
 def normalize(obj):
     """1.8 units tall, origin at the feet, centred on X, facing +Z."""
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-    bounds = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
-    min_v = Vector((min(b.x for b in bounds), min(b.y for b in bounds), min(b.z for b in bounds)))
-    max_v = Vector((max(b.x for b in bounds), max(b.y for b in bounds), max(b.z for b in bounds)))
-
+    min_v, max_v = world_bounds([obj])
     height = max_v.z - min_v.z
     print(f'  imported bounds: {min_v} .. {max_v}  height {height:.4f}')
 
@@ -431,16 +428,33 @@ def normalize(obj):
     bpy.ops.object.transform_apply(scale=True)
 
     # Re-measure after scaling, then move feet to origin and centre on X.
-    bounds = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
-    min_v = Vector((min(b.x for b in bounds), min(b.y for b in bounds), min(b.z for b in bounds)))
-    max_v = Vector((max(b.x for b in bounds), max(b.y for b in bounds), max(b.z for b in bounds)))
-
+    min_v, max_v = world_bounds([obj])
     obj.location.z -= min_v.z
     obj.location.x -= (min_v.x + max_v.x) / 2
     bpy.ops.object.transform_apply(location=True)
 
     print(f'  normalized to height {TARGET_HEIGHT}, feet at z=0')
     return TARGET_HEIGHT
+
+
+def assert_world_bounds(objs):
+    """Gate the assembled rig on the §4.1 dimensions before export."""
+    min_v, max_v = world_bounds(objs)
+    height = max_v.z - min_v.z
+    centre_x = (min_v.x + max_v.x) / 2
+    print(f'  final world bounds: {min_v} .. {max_v}')
+    print(f'  height {height:.4f}  feet z={min_v.z:.4f}  x-centre {centre_x:.4f}')
+
+    failures = []
+    if abs(height - TARGET_HEIGHT) > 0.02:
+        failures.append(f'height {height:.4f} != {TARGET_HEIGHT} (tolerance 0.02)')
+    if abs(min_v.z) > 0.02:
+        failures.append(f'feet at z={min_v.z:.4f}, expected 0 — origin is not at the feet')
+    if abs(centre_x) > 0.05:
+        failures.append(f'not centred on X: midpoint {centre_x:.4f}')
+    if failures:
+        raise SystemExit('FAIL:\n' + '\n'.join(f'  - {f}' for f in failures))
+    print('  bounds OK')
 
 
 def measure_torso_half_width(obj, chest_z):
@@ -562,6 +576,14 @@ def main():
         parent_to(forearm, shoulder)
         parent_to(hand, forearm)
 
+    # --- World-bounds gate ------------------------------------------------
+    # This is the only place the robot's real dimensions can be read without
+    # ambiguity. After set_pivot(), each part's *local* vertex data is relative
+    # to its own joint, so a downstream reader of the GLB accessors sees ten
+    # small boxes around ten different origins, not one robot. Blender still has
+    # the world matrices, so assert here.
+    assert_world_bounds([body, head, *(o for trio in arms.values() for o in trio)])
+
     # --- Export -----------------------------------------------------------
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.export_scene.gltf(
@@ -591,7 +613,9 @@ cd latest/v2 && blender --background --python src/tools/split-rig.py -- \
   docs/reference/robot-gen/fused.glb docs/reference/robot-gen/split.glb
 ```
 
-Expected output: the imported bounds, the normalized height, the torso half-width, per-side shoulder/elbow/wrist coordinates, then `exported ...`.
+Expected output: the imported bounds, the normalized height, the torso half-width, per-side shoulder/elbow/wrist coordinates, then `final world bounds`, `bounds OK`, and `exported ...`.
+
+If it exits with `FAIL:` on the bounds gate, the split has moved geometry it should not have — most likely a part was separated but never re-parented, so it kept a stale transform. Check the assembly block before touching any threshold.
 
 - [ ] **Step 3: Verify the contract**
 
@@ -599,7 +623,7 @@ Expected output: the imported bounds, the normalized height, the torso half-widt
 cd latest/v2 && node src/tools/verify-glb.mjs docs/reference/robot-gen/split.glb
 ```
 
-Expected: `OK` — all ten nodes present, parented, 1.8 units tall, feet at zero, under the triangle cap.
+Expected: `OK` — all ten nodes present, no duplicate names, everything parented under `Root`, under the triangle cap. Dimensions were already gated by `assert_world_bounds` in Step 2; this is the hierarchy contract Plan 2's `bindRig` consumes.
 
 - [ ] **Step 4: Iterate the thresholds if it fails**
 
