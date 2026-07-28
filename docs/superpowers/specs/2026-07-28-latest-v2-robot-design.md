@@ -732,6 +732,13 @@ there is nothing to gate.
 `robot-poster.webp` depicts that same composited final state, so the one asset
 serves both the no-WebGL fallback and the reduced-motion path.
 
+**No dialog can open during the intro**, because both triggers live in the
+`visibility: hidden` marquee and there is no other route to `showModal()` — no
+hash-fragment handler, no autofocus path. So the paused-loop case never
+overlaps the intro clock, and the two mechanisms cannot interfere. If a
+deep-link-to-dialog feature is ever added, this stops being true and the intro
+must then be driven by elapsed wall-clock rather than by frames.
+
 **On dialog close, check for a canvas resize before resuming.** Rotation or
 an on-screen keyboard can change canvas dimensions while the loop is paused;
 resuming blind restores a stale drawing-buffer size.
@@ -763,7 +770,11 @@ otherwise used identically.
   handoff shows no jump in framing; total elapsed to marquee reveal ≤ 3.9s
 - **Face registration**: face stays inside the visor across the full camera
   travel *and* through the lookAt range (neck yaw ±22°, pitch ±14°)
-- **Final `contribution` ≈ 0.05** — face detectable on inspection, not at a glance
+- **Final `contribution` ∈ [0.04, 0.07]** — asserted as a unit test on the two
+  settled constants, alongside the behaviour tests below. `contribution` is a
+  product of authored values, so it is checkable without rendering. The
+  "detectable on inspection, not at a glance" judgement is a *tuning* step that
+  sets those constants, not the gate itself
 - `prefers-reduced-motion` pass: static composited state, face visible, no motion
 - Keyboard: Tab during the intro jumps to settled state; then Tab through
   links, open/close both dialogs, focus returns to trigger, Esc closes
@@ -787,7 +798,12 @@ otherwise used identically.
    retiring the current root `index.html`) is a separate decision.
 6. **Face calibration constants** — `F`, `yFace`, `zFace` (§6.1) cannot be
    written until the helmet exists. Record them here once measured; the intro
-   is not implementable before then.
+   is not implementable before then. **`robot-poster.webp` depends on this**:
+   it must depict the settled composited state, so it can only be captured
+   *after* the constants are measured and `visorOpacity` is tuned. It is
+   therefore the last asset produced, and the §3.1 staleness rule applies to it
+   as much as to the bundle — it serves both the no-WebGL and reduced-motion
+   paths, so a stale poster silently degrades two accessibility branches.
 7. **Visor generation risk** — §4.3 now asks for a smoked visor rather than
    chrome. If the generator keeps producing reflective plates, the fallback is
    to author the visor entirely in Three.js as a plane over a blank helmet,
