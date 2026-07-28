@@ -231,7 +231,7 @@ latest/v2/
 │   ├── styles.css
 │   ├── app.js              # committed esbuild output — see staleness rule
 │   ├── robot.glb
-│   ├── face-512.jpg        # matted portrait, square — see §4.5
+│   ├── face-512.jpg        # unretouched portrait, square crop — see §4.5
 │   ├── face-1024.jpg
 │   ├── face-1536.jpg
 │   └── robot-poster.webp   # composited final state — see §7
@@ -423,50 +423,63 @@ third party's screenshots*, which never described Alejandro's own portrait.
 The prepared derivatives live at `latest/v2/assets/` and are committed like
 any other deployed asset.
 
-This is **one-time manual asset prep, not a pipeline stage.** There is no
-build step to hang it on (§3) and it runs exactly once, so it is specified as
-requirements plus a starting recipe, not as a script to be maintained.
+**The photo is not retouched.** No chroma key, no matte, no despill, no
+alpha. The amber backdrop stays exactly as photographed. Asset prep is a crop
+and three resizes — nothing that requires judgement about hair edges.
 
-**Measured source values** (sampled with `ffprobe`/`ffmpeg`, so the key is
-asserted rather than tuned):
+This is deliberate. Keying amber away from skin and curly hair is the single
+most failure-prone step in the whole pipeline: the hair edge is
+semi-transparent against the backdrop, and amber spill on the jawline reads as
+a wrong-coloured rim light the moment the background goes black. That is the
+classic cut-out tell. **Framing removes the backdrop more reliably than keying
+does**, and it is reversible — a crop can be re-cut, a bad matte is baked in.
 
-| Region | Value |
-|---|---|
-| backdrop, top-left / top-centre / top-right | `#F5B706` / `#F4B507` / `#F7BA08` |
-| bottom corners (his shirt) | `#020200` / `#050403` |
+**How the amber disappears without being edited.** Two mechanisms, both at
+runtime and both specified in §6.1:
 
-Two things follow. The backdrop is **evenly lit** — under 3 points of drift
-across the top edge — so a single key value works. And the **blue channel is
-the separator**: backdrop `B≈6`, skin `B≈96`. Keying on *high red with
-near-zero blue* has a ~90-point margin against skin, which is an assertion,
-not a threshold that needs tuning. Do **not** key on hue; amber and skin are
-neighbours there.
+1. **A tight square crop** puts the face across the full frame. Only the two
+   upper corners still hold backdrop, above the hairline.
+2. **A radial vignette** on the face plane dissolves its edge into
+   `--surface-0` before those corners are ever reached. It is doing a second
+   job regardless: without it the square plane would show a hard letterbox
+   edge against a non-square viewport.
 
-The lower third needs no work at all — the black shirt already measures
-`#020200`, which *is* the target background.
+Net effect at `t=0`: a face emerging from black, which is what §1 promises and
+what the original brief asked for. The visitor never sees amber. Nothing in
+the source file changed.
+
+> **Why not let a little amber show?** It was considered — a warm halo in
+> phase A ramping to black across B–C is closer to a literal reading of "fade
+> the yellow to black". It is rejected because it puts a **second colour
+> moment** on a page whose design system allows exactly one (the gradient
+> headline), and it would be the first thing the visitor sees. The lever
+> exists if the vignette proves too severe in practice; see §9.
 
 **Requirements for the output:**
 
-1. Background is `#000000`, matching `--surface-0`
-2. **No amber fringe** on the hair. Curly edges are semi-transparent against
-   the backdrop and are where a lazy key shows
-3. **No amber spill** on skin, jawline or collar. Uncorrected, it reads as a
-   wrong-coloured rim light once the background is black — the single most
-   likely tell that this is a cut-out
-4. **Cropped square to the face**, not head-and-shoulders. The plane maps 1:1
-   to the visor (§6.1), so the face must fill the frame or it ends up a small
-   portrait floating inside the helmet
-5. Emitted at **512 / 1024 / 1536** px, served via `srcset`
-6. JPEG **pre-composited on black**, not PNG with alpha. The background is
-   always black, so alpha buys nothing, costs bytes, and lets the spill
-   problem survive to runtime instead of being solved once here
+1. **Cropped square and tight to the face** — hairline to just below the chin,
+   not head-and-shoulders. The plane maps 1:1 to the visor (§6.1), so the face
+   must fill the frame or it ends up a small portrait floating inside the
+   helmet. The shirt and shoulders are cropped out entirely
+2. Eyes sit on the **upper third** of the square. They are what the visitor
+   reads first and what the visor closes over
+3. Emitted at **512 / 1024 / 1536** px, served via `srcset`
+4. **JPEG, no alpha.** Opacity is authored per-frame in the shader (§6.1) and
+   the vignette is generated, not baked — an alpha channel would only add
+   bytes and a second, conflicting source of edge shape
+5. Colour is left alone. No levels, no white balance, no saturation change
 
 **Starting recipe.** `ffmpeg` is available locally; ImageMagick, PIL and
-rembg are not. Sample the exact backdrop hex first, then key, despill by
-lifting blue in the keyed neighbourhood, crop and scale. Expect to eyeball the
-hair edge and iterate the similarity/blend values. If the fringe resists,
-finish it by hand in an image editor — it is one image, and a brittle filter
-chain is not worth maintaining for a single asset.
+rembg are not — and none of them are needed now. On the 1600×1600 source the
+face centres near `x≈810` with the hairline at `y≈50` and the chin at
+`y≈960`, so a ~1000px square around `(810, 520)` is the starting crop:
+
+```sh
+ffmpeg -i me.jpg -vf "crop=1000:1000:310:20,scale=1024:1024" face-1024.jpg
+```
+
+Re-cut by eye against the vignette radius in §6.1 — the two must be tuned
+together, since the crop decides how much backdrop the vignette has to cover.
 
 ## 5. Fidelity acceptance criteria
 
@@ -549,7 +562,7 @@ One-shot on load, **3.5s total**, after which the marquee reveals. Camera fov
 #### The face is a plane parented to `Head`
 
 `face.js` builds two planes and parents both to the `Head` node from §4.1: the
-**face plane** carrying the matted portrait (§4.5), and the **visor plane**
+**face plane** carrying the unretouched portrait (§4.5), and the **visor plane**
 immediately in front of it.
 
 Parenting is the whole reason registration is free. The face rides the same
@@ -618,6 +631,32 @@ landscape the square face fills the viewport **height**; in portrait it fills
 the **width**, with page-black above and below. One expression covers both
 orientations with no breakpoint and no second crop.
 
+#### The backdrop is framed out, not keyed out
+
+The portrait ships unretouched on its amber backdrop (§4.5). A **radial
+vignette** on the face plane removes it at runtime:
+
+```glsl
+float r = length(vUv - 0.5) * 2.0;           // 1.0 at edge midpoints, 1.41 at corners
+float edge = 1.0 - smoothstep(0.58, 0.95, r);
+gl_FragColor = vec4(tex.rgb, tex.a * edge * uFaceOpacity);
+```
+
+The geometry does the work. Backdrop survives only in the crop's upper
+corners, which sit at `r ≈ 1.4` — far outside the falloff and therefore at
+zero alpha. Even on the diagonal at `r = 0.9`, alpha is ≈0.06. Amber is
+suppressed by two orders of magnitude without a single pixel being keyed.
+
+The vignette is **not only** a backdrop fix. A square plane against a
+non-square viewport would otherwise show a hard letterbox edge; the falloff
+dissolves it into `--surface-0`. One mechanism, two problems, and it is what
+makes the face read as *emerging from black* rather than as a photo pasted on
+top of it.
+
+`0.58` and `0.95` are starting values and **tune together with the §4.5 crop**
+— the crop decides how much backdrop the falloff has to cover. Tightening one
+without the other is what puts amber back on screen.
+
 #### Poster handoff
 
 The DOM poster is the LCP element (§2.6) and cross-fades out over 200ms on the
@@ -625,14 +664,26 @@ first rendered WebGL frame. The handoff is invisible only if both render
 identical framing — so they are made to, by construction rather than by tuning:
 
 ```css
-.intro-poster { position: fixed; inset: 0; width: 100%; height: 100%;
-                object-fit: contain; background: var(--surface-0); }
+.intro-poster {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  object-fit: contain;
+  background: var(--surface-0);
+  mask-image: radial-gradient(circle closest-side at 50% 50%,
+                              #000 58%, transparent 95%);
+}
 ```
 
-`object-fit: contain` on a **square** image means *fill the shorter axis,
-letterbox the longer* — which is the same rule `Math.min(aspect, 1)` encodes
-for the camera. The two are one decision expressed twice, and neither may be
-changed alone.
+Two correspondences, and **neither half may be changed alone**:
+
+- `object-fit: contain` on a **square** image means *fill the shorter axis,
+  letterbox the longer* — the same rule `Math.min(aspect, 1)` encodes for the
+  camera
+- `closest-side` normalises the gradient's `100%` to the image half-width,
+  which is exactly what `length(vUv - 0.5) * 2.0` normalises to in the shader.
+  The two percentages are therefore the same two numbers
+
+Without the mask the poster would show amber corners for the few hundred
+milliseconds before WebGL takes over, and the handoff would pop.
 
 #### Off-axis bias ramps in from zero
 
@@ -768,6 +819,11 @@ otherwise used identically.
 - No horizontal overflow; footer legible without scrolling at every width
 - **Intro sequence**: face legible at `t=0` on both orientations; poster→WebGL
   handoff shows no jump in framing; total elapsed to marquee reveal ≤ 3.9s
+- **No amber on screen at any frame**, poster included — sample the four
+  corners and the top edge of a `t=0` screenshot; all must be `--surface-0`.
+  This is the gate on §4.5's decision not to key the backdrop, and it is
+  objective precisely because the alternative failure (a soft amber fringe) is
+  the kind of thing that survives an eyeball check
 - **Face registration**: face stays inside the visor across the full camera
   travel *and* through the lookAt range (neck yaw ±22°, pitch ±14°)
 - **Final `contribution` ∈ [0.04, 0.07]** — asserted as a unit test on the two
@@ -809,9 +865,15 @@ otherwise used identically.
    to author the visor entirely in Three.js as a plane over a blank helmet,
    which is the §4.3 eye-panel argument applied one level up. Decide by
    attempt 3, not attempt 6.
-8. **Spill correction on the portrait** — §4.5 asserts the key is safe; the
-   hair fringe is the part that may need hand finishing. Confirm against the
-   real output before committing the derivatives.
+8. **Crop and vignette radius are one tuning pass, not two** — §4.5's square
+   crop and §6.1's `0.58 / 0.95` falloff are coupled: the crop sets how much
+   backdrop the vignette must cover. Tune against a real render, and check the
+   **chin** in particular, which is the feature most likely to fall inside the
+   falloff and go soft. If the vignette has to be pulled so tight that the face
+   is cropped by it, re-cut the crop rather than pushing the radius out.
+   The rejected alternative — an amber halo ramping to black across phases B–C
+   — remains available if a fully black opening reads as too austere, but it
+   costs the page its single-colour-moment rule (§4.5).
 9. **Short-viewport lever** — `DESIGN-SYSTEM.md` §2.5 records three candidate
    fixes for the headline collision and does not pick one. It must be resolved
    together with the §2.6 landscape breakpoint, against a real render.

@@ -100,6 +100,21 @@ The two Apple docs are different design languages from the same company. v2 is a
 marketing page, and `DESIGN-SYSTEM.md` is measured from Apple's live MacBook Pro
 product page rather than derived from either doc.
 
+### Do not run design-recommendation skills against v2
+
+Specifically `ui-ux-pro-max`, but the rule is general. It is a recommender —
+84 UI styles, 161 palettes, 73 font pairings, indexed for search — and its job
+is to *choose* a direction, palette and type pairing. **v2 has already chosen
+all three, by measurement rather than by recommendation.** Running it here does
+not add a viewpoint, it adds a second source of truth competing with
+`DESIGN-SYSTEM.md`, and the tie-break would go the wrong way: measured values
+lose arguments to confident ones. Its stack presets are also Tailwind-first,
+which v2 bans.
+
+It is a reasonable tool where nothing is chosen yet — the niche re-skins in
+`docs/variants/` are the plausible case, and those are content-only today.
+Not v2's design system.
+
 ## Non-negotiables
 
 These are the rules. Values, rationale, and specification live in the files above.
