@@ -275,9 +275,33 @@ long line:
 .marquee__headline { max-width: 20ch; text-wrap: balance; }
 ```
 
-**[tune]** — 20ch holds the current 52-character line to 2 lines at 1440px and
-3 at 1024px. Re-check whenever the copy changes, and verify the block still
-clears the robot's feet at the tallest wrap.
+**[tune]** — the current headline is **58 characters**, so a 20ch cap wraps it
+to 3 lines at every width from 1440px down. Re-check whenever the copy changes.
+
+**The clamp saturates at ~800px, and it is blind to height.** `1.2rem + 5.6vw`
+reaches the 4rem ceiling at a 797px viewport, so from ~800px up the headline is
+a *fixed* 64px and only the `1fr` robot row absorbs any change in window size.
+On a short laptop viewport the arithmetic gets tight — 1024×640, three lines:
+
+| Band | Height |
+|---|---|
+| headline, 3 × 64px × 1.08 | 207px |
+| eyebrow, 28px × 1.19 | 33px |
+| links row + card | ~25px |
+| footer legal, 13px × 1.43 | 19px |
+| gaps and page gutters (§5.2) | ~160px |
+| **consumed** | **~444px of 640px** |
+
+That leaves ~196px for the `1fr` void, against a spec that wants the robot in
+the upper ~60% (384px). **The robot's lower third would collide with the
+eyebrow.** Not yet resolved, and it must be settled before the grid is written.
+
+The lever is the **cap, not the leading** — 1.08 is [measured] from Apple and
+tightening it further would be inventing a number, whereas 20ch is [tune] and
+was set before line height existed. Widening to ~28ch drops the headline to 2
+lines and returns ~69px. A `clamp()` on the headline that also reads `dvh`, or
+a `@media (max-height: 700px)` step-down, are the other two candidates. Pick one
+when the page is built and the wrap can be seen rather than computed.
 
 ---
 
@@ -591,6 +615,11 @@ Verifiable, not aspirational. Each must be checked before v2 ships.
       confirm nothing re-enables them)
 - [ ] Headline wraps to 2–3 lines at 1440px / 1024px / 768px and clears the
       robot's feet at the tallest wrap; `max-width` recorded in §2.5
+- [ ] **Short-viewport fit**: at 1024×640 and 1280×720 the whole marquee sits
+      inside `100dvh` with the footer visible and no overlap between the robot
+      and the eyebrow. §2.5 computes ~444px consumed of 640px — verify against
+      the real render, and record which lever was used (cap widened to ~28ch,
+      `dvh`-aware clamp, or `max-height` step-down)
 - [ ] Every interactive target ≥44×44px
 - [ ] Keyboard path reaches all four links plus both dialogs; focus visible
       throughout; Esc closes dialogs; focus returns to trigger
