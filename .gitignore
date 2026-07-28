@@ -32,3 +32,6 @@ next-env.d.ts
 
 # playwright mcp artifacts
 .playwright-mcp/
+
+# local-only visual reference (third-party screenshots — never publish)
+/docs/reference/
