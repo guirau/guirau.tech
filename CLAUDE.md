@@ -11,7 +11,6 @@ drift apart. See **Documentation hierarchy** for which file owns what.
 Do **not** open, `cat`, `grep`, or otherwise load the contents of these paths.
 They are stale or private and will pollute fresh work:
 
-- **`docs/method.md`** — private working notes. Not an input to the build.
 - **v0 at the repo root** — `index.html`, `assets/`, `images/`, `projects/`. The
   original HTML5 UP template (jQuery, FontAwesome, SASS). It is **not** the design
   direction for v2, and reading it biases new work toward outdated patterns.
@@ -24,6 +23,27 @@ They are stale or private and will pollute fresh work:
 > A hard backstop for the Read tool is configured in `.claude/settings.local.json`
 > (`permissions.deny`). This section extends that to Bash/Grep by intent — please
 > respect it rather than working around it.
+
+### `docs/method.md` — readable, but not authoritative
+
+Formerly listed above as unreadable. It is Alejandro's working notes on *how to
+build an animated site with Claude + Higgsfield*, and it is a legitimate input
+to **process** questions: how to stage generation, what to gate on, what the
+polish passes are.
+
+It is **not** a spec, and two of its assumptions do not hold for v2:
+
+- It describes a **single-page scroll** site throughout — narrative flow, scroll
+  moments, frame-by-frame scroll wiring. v2 is one screen with no scroll, so
+  its Phase 2 structure work and Phase 4 scroll wiring do not apply.
+- It recommends **UI/UX Pro Max** and a Next.js/Tailwind/shadcn default stack.
+  Both are superseded below and in `docs/DESIGN-SYSTEM.md`. By `method.md`'s own
+  rule — *"if anything conflicts with CLAUDE.md, CLAUDE.md wins"* — this file
+  and the docs it points to take precedence.
+
+It also holds a **second copy of the offer content**. `CONTENT.md` owns the
+words and numbers; treat the copy in `method.md` as a snapshot that may drift.
+They agree as of this writing.
 
 ## What this project is
 
@@ -100,20 +120,28 @@ The two Apple docs are different design languages from the same company. v2 is a
 marketing page, and `DESIGN-SYSTEM.md` is measured from Apple's live MacBook Pro
 product page rather than derived from either doc.
 
-### Do not run design-recommendation skills against v2
+### `DESIGN-SYSTEM.md` is the only design authority. Do not run design skills.
 
-Specifically `ui-ux-pro-max`, but the rule is general. It is a recommender —
-84 UI styles, 161 palettes, 73 font pairings, indexed for search — and its job
-is to *choose* a direction, palette and type pairing. **v2 has already chosen
-all three, by measurement rather than by recommendation.** Running it here does
-not add a viewpoint, it adds a second source of truth competing with
-`DESIGN-SYSTEM.md`, and the tie-break would go the wrong way: measured values
-lose arguments to confident ones. Its stack presets are also Tailwind-first,
-which v2 bans.
+**Build v2's frontend from `docs/DESIGN-SYSTEM.md` and nothing else.** No
+design-recommendation skill, no generated design system, no proposed style
+directions. This includes `ui-ux-pro-max`, which `docs/method.md` recommends —
+that recommendation is superseded here.
 
-It is a reasonable tool where nothing is chosen yet — the niche re-skins in
-`docs/variants/` are the plausible case, and those are content-only today.
-Not v2's design system.
+The reasoning generalises past that one skill. A recommender's job is to
+*choose* a direction, palette and type pairing from a catalogue. **v2 has
+already chosen all three, by measuring Apple's live product page rather than by
+picking from a list.** Running one now would not add a viewpoint; it would add
+a second source of truth competing with `DESIGN-SYSTEM.md`, and that argument
+resolves the wrong way — measured values ("`#1D1D1F`, sampled") lose to
+confident ones ("dark-luxury palette, 161 options"). Their stack presets are
+Tailwind-first besides, which v2 bans.
+
+For a one-screen page with two dialogs and a canvas, that is overengineering:
+cost and risk with no decision left to make.
+
+Such tools are reasonable where nothing is chosen yet. The niche re-skins in
+`docs/variants/` are the plausible future case, and those are content-only
+today. Not v2's design system.
 
 ## Non-negotiables
 

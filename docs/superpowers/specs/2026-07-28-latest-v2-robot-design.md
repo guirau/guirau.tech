@@ -522,9 +522,26 @@ build input and never a deployed asset.
 - exact visor outline and helmet facet count
 - the original's settled arm pose (we generate neutral and pose in code)
 
+**Judge criteria 1–5 at the image stage, before spending a 3D credit.** The
+pipeline is already two-stage — §4.3 produces four views, §4.4 converts them —
+but the checklist above was written as if it ran once, at the end. It does not
+have to. Every one of the five criteria is visible in the front view alone:
+visor treatment, proportion, taper, arm length, silhouette. Iterating in image
+space is cheaper, faster, and the only stage where the *look* is still
+negotiable — once geometry exists, a wrong visor is a regeneration, not an
+edit.
+
+So the loop is: iterate the §4.3 views until the front view passes all five,
+**then** run `multi_image_to_3d` once. The 3D stage is then verifying the
+conversion, not discovering the design.
+
 **Stop rule.** After **6 generation attempts** without passing, stop. Either
 revise the written brief or fall back to the unsplit-mesh mode in §7. Do not continue
 open-endedly.
+
+The count is **6 image attempts**, which is the cheap loop. A failed 3D
+conversion of an approved image set is a separate and much shorter loop —
+it means the parameters in §4.4 are wrong, not the design.
 
 ---
 
@@ -846,8 +863,10 @@ otherwise used identically.
 
 1. **`pose_mode` with rigging off** — verify on the first generation (§4.4).
    The A-pose is the highest-stakes constraint in the pipeline.
-2. **Per-attempt credit cost** — unknown until attempt 1 (§4.4). Re-check the
-   6-attempt stop rule once measured.
+2. **Per-attempt credit cost** — unknown until attempt 1 (§4.4). Record the
+   **image** and **3D conversion** costs separately: §5 now spends most
+   attempts on the cheap stage, so a single blended figure would misprice the
+   6-attempt stop rule in both directions.
 3. **Santander** — withheld; confirm before adding.
 4. **Positioning line** — default proposed in §2.1, swappable.
 5. **Root promotion** — page is built root-ready; the actual promotion (and
@@ -864,7 +883,9 @@ otherwise used identically.
    chrome. If the generator keeps producing reflective plates, the fallback is
    to author the visor entirely in Three.js as a plane over a blank helmet,
    which is the §4.3 eye-panel argument applied one level up. Decide by
-   attempt 3, not attempt 6.
+   **image** attempt 3, not attempt 6 — §5 now gates the look in image space,
+   so this decision costs three cheap attempts rather than three 3D
+   conversions.
 8. **Crop and vignette radius are one tuning pass, not two** — §4.5's square
    crop and §6.1's `0.58 / 0.95` falloff are coupled: the crop sets how much
    backdrop the vignette must cover. Tune against a real render, and check the
