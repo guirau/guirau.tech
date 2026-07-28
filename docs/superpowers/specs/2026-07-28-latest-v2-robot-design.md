@@ -206,7 +206,7 @@ written brief -> Higgsfield image gen -> 4 reference views
                       Blender headless (src/tools/split-rig.py)
                       split into rigid parts, set pivots, parent, re-export
                                               |
-                      gltf-transform: strip textures, Meshopt compress
+                        gltf-transform: Meshopt compress
                                               |
                                     Three.js: author materials
 ```
@@ -216,11 +216,21 @@ must pivot rigidly. A skinned/auto-rigged mesh stretches the surface at the
 elbow like skin, which reads as a bug on a glossy hard shell. The requirement
 is *separate rigid parts in a parent-child tree*, not a skeleton.
 
-> `3d_rigging` exists as a Higgsfield model. Read its spec
-> (`docs/higgsfield-model-specs.json`, produced by `docs/setup-guides/setup-3d-toolchain.md`)
-> before implementing. If it yields **rigid separated parts**, the Blender step
-> may shrink. If it yields a **skinned** rig, the objection above stands and
-> Blender remains central.
+**Higgsfield's rigging is not a substitute.** The captured specs
+(`docs/higgsfield-model-specs.json`) show `enable_rigging` paired with
+`enable_animation` + `animation_action_id` — a library of pre-made animation
+actions selected by ID. Canned actions can only replay against a **standard
+skinned humanoid skeleton**, which is precisely the soft-deformation rig this
+design rejects. `3d_rigging` takes a `model_url` and rigs an existing model,
+so it is the same mechanism applied after the fact.
+
+> This is a strong inference from the parameter shape, not a documented
+> guarantee. If a trial generation with `enable_rigging=true` turns out to
+> emit separated rigid parts, the Blender step shrinks. Plan for Blender.
+
+**No texture-stripping step is needed.** `should_texture` defaults to
+`false`, so the generated GLB is geometry-only by default — we simply never
+ask for textures. gltf-transform is used for Meshopt compression alone.
 
 ### 4.1 Node hierarchy (contract between Blender and Three.js)
 
@@ -273,6 +283,39 @@ Two constraints are load-bearing:
 
 Lighting is specified flat and even because image-to-3D routinely
 reconstructs blown specular highlights as surface geometry.
+
+### 4.4 Generation parameters (`multi_image_to_3d`)
+
+From the captured specs. These are set explicitly; do not rely on defaults.
+
+| Param | Value | Why |
+|---|---|---|
+| `image_references` | the 4 views | required |
+| `pose_mode` | `"a-pose"` | the A-pose as a **parameter**, not a prompt hope |
+| `symmetry_mode` | `"on"` | a humanoid is bilaterally symmetric; enforced symmetry makes the left/right split heuristics mirror reliably |
+| `topology` | `"quad"` | quad edge loops cut far more cleanly at joints than triangles |
+| `should_texture` | `false` | geometry-only GLB (also the default) |
+| `should_remesh` | `true` | uniform topology for predictable splitting |
+| `target_polycount` | 40000 | holds the GLB budget without decimating in Blender |
+| `seed` | fixed, recorded per attempt | makes the 6-attempt loop reproducible |
+| `enable_rigging` | `false` | see §4 — we do not want a skinned rig |
+| `enable_animation` | `false` | requires rigging; all motion is authored in code |
+
+`pose_mode` is a documented enum (`a-pose` | `t-pose`), which materially
+de-risks the pose constraint: the A-pose no longer depends on the image
+generator honouring prose. **Keep the prose constraint anyway** — it governs
+the reference images, which is where fused-in arms actually originate.
+
+> **Verify on the first generation:** `pose_mode` sits alongside
+> `rigging_height_meters` in the parameter list, so it may only take effect
+> when `enable_rigging=true`. If the A-pose is ignored with rigging off, the
+> prompt constraint in §4.3 becomes the sole guarantee and matters more, not
+> less.
+
+**Budget.** Account is on the starter plan with 243 credits at capture. A
+text-to-3D reference job costs 5 credits; image-based 3D jobs cannot be
+priced without an upload, so per-attempt cost is unknown. Record actual cost
+after attempt 1 and re-check the 6-attempt stop rule against it.
 
 ---
 
@@ -417,10 +460,10 @@ head-turn and arm sway. Two of four behaviours, degraded rather than broken.
 
 ## 9. Open items
 
-1. **Higgsfield model specs** — `docs/higgsfield-model-specs.json` not yet
-   produced. Determines whether `3d_rigging` reduces the Blender step (§4).
-2. **Toolchain not installed** — Blender, `@higgsfield/cli`,
-   `@gltf-transform/cli`. See `docs/setup-guides/setup-3d-toolchain.md`.
+1. **`pose_mode` with rigging off** — verify on the first generation (§4.4).
+   The A-pose is the highest-stakes constraint in the pipeline.
+2. **Per-attempt credit cost** — unknown until attempt 1 (§4.4). Re-check the
+   6-attempt stop rule once measured.
 3. **Santander** — withheld; confirm before adding.
 4. **Positioning line** — default proposed in §2.1, swappable.
 5. **Root promotion** — page is built root-ready; the actual promotion (and
