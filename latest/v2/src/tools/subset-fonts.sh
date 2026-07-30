@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 # Regenerates assets/fonts/*.woff2 from the geist npm package.
-# Requires: python3 -m venv /tmp/fontenv && /tmp/fontenv/bin/pip install fonttools brotli
+# Requires: python3 -m venv /tmp/fontenv && /tmp/fontenv/bin/pip install fonttools==4.63.0 brotli==1.2.0
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 SUBSET="${PYFTSUBSET:-/tmp/fontenv/bin/pyftsubset}"
+
+command -v "$SUBSET" > /dev/null || {
+  echo "pyftsubset not found at $SUBSET — see setup comment at the top of this file" >&2
+  exit 1
+}
+
 SRC="node_modules/geist/dist/fonts"
 
 # U+0000-00FF  Latin-1 (covers the accented names: Telefonica, Masterschool)
