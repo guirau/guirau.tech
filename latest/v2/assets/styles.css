@@ -71,3 +71,53 @@ html, body {
 
 /* One screen. No page scroll. */
 body { overflow: hidden; }
+
+/* ---- Stage: fixed full-bleed backdrop, §5.1 ---- */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--surface-0);
+}
+
+/* ---- Marquee: the grid that overlays it, §5.1 ---- */
+.marquee {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: var(--gutter);
+  padding-bottom: var(--safe-bottom);
+}
+
+.marquee__text   { grid-area: 2 / 1; align-self: end; }
+.marquee__card   { grid-area: 2 / 2; align-self: end; }
+.marquee__footer {
+  grid-area: 3 / 1 / 4 / 3;
+  margin-top: var(--space-4);
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+  /* No ligature may substitute the hyphen a verification reviewer matches on. */
+  font-variant-ligatures: none;
+  font-feature-settings: normal;
+}
+
+/* ---- Type roles, §2.4 ---- */
+.marquee__eyebrow {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-eyebrow);
+  font-weight: 600;
+  line-height: 1.19;
+  color: var(--text-secondary);
+}
+
+.marquee__headline {
+  margin: 0;
+  font-size: var(--text-headline);
+  font-weight: 600;
+  line-height: 1.08;
+  max-width: 20ch;          /* [tune] — Task 14 resolves this against a render */
+  text-wrap: balance;
+}
