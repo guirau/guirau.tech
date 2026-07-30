@@ -1,0 +1,11 @@
+# Dependencies — root .gitignore is root-anchored and does not cover this path.
+# static.yml publishes path:'.', so an unignored install would be served publicly.
+node_modules/
+
+# Playwright
+test-results/
+playwright-report/
+.playwright/
+
+# Font subsetting intermediates
+src/tools/.fontcache/

@@ -1,0 +1,16 @@
+{
+  "name": "guirau-tech-v2",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "guirau.tech v2 — single-screen robot page",
+  "scripts": {
+    "serve": "python3 -m http.server 4173",
+    "test": "playwright test",
+    "test:unit": "node --test tests/unit/",
+    "build": "echo 'No bundle yet — Plan 2 replaces this with esbuild.' && exit 0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}
