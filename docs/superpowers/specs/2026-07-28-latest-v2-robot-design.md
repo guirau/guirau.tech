@@ -108,12 +108,12 @@ The legal name additionally appears in `<title>` and in a JSON-LD
 
 ### 2.3 Links
 
-| Link | Behaviour |
-|---|---|
-| LinkedIn | external, `target="_blank" rel="noopener noreferrer"` |
-| GitHub | external, same |
-| Services | native `<dialog>`, scrolls internally |
-| Contact | native `<dialog>` |
+| Link     | Behaviour                                              |
+| -------- | ------------------------------------------------------ |
+| LinkedIn | external,`target="_blank" rel="noopener noreferrer"` |
+| GitHub   | external, same                                         |
+| Services | native`<dialog>`, scrolls internally                 |
+| Contact  | native`<dialog>`                                     |
 
 Both popups use the native `<dialog>` element with `showModal()`. This
 provides focus trapping, Esc-to-close, background `inert`, a stylable
@@ -126,12 +126,12 @@ roughly ten lines, with no modal library. `<dialog>` defaults to
 Four compact cards, sourced from `docs/CONTENT.md`. Per card: headline,
 tagline, price and duration, and 3–5 bullets.
 
-| Offer | Price / duration |
-|---|---|
-| AI Strategy Consultation | From $199 · 3 days |
-| n8n Workflow Automation | From $497 · 5 days |
-| Custom AI Agent | From $897 · 3 tiers |
-| AI App — End-to-End Build | $8,997 · 5 weeks |
+| Offer                      | Price / duration     |
+| -------------------------- | -------------------- |
+| AI Strategy Consultation   | From $199 · 3 days  |
+| n8n Workflow Automation    | From $497 · 5 days  |
+| Custom AI Agent            | From $897 · 3 tiers |
+| AI App — End-to-End Build | $8,997 · 5 weeks    |
 
 Every card CTA closes Services and opens **Contact**, preserving the funnel.
 
@@ -185,11 +185,11 @@ a single centred column below 900px. A 844×390 phone is below that threshold,
 so it would stack a column into 390px of height and push the footer out. The
 breakpoint must read **both axes**:
 
-| Viewport | Layout |
-|---|---|
-| width ≥ 900px | two-column asymmetric marquee |
-| width < 900px **and** height ≥ 500px | single centred column |
-| width < 900px **and** height < 500px | two-column marquee, compressed |
+| Viewport                                   | Layout                         |
+| ------------------------------------------ | ------------------------------ |
+| width ≥ 900px                             | two-column asymmetric marquee  |
+| width < 900px**and** height ≥ 500px | single centred column          |
+| width < 900px**and** height < 500px  | two-column marquee, compressed |
 
 Short-landscape keeps two columns precisely *because* it is short: horizontal
 space is what it has, and vertical space is what it lacks. This is the same
@@ -270,11 +270,11 @@ verification only reads the domain root.
 
 ### 3.3 Weight targets
 
-| Asset | gzipped target |
-|---|---|
-| `app.js` (tree-shaken Three + GLTFLoader + our code) | ~150 KB |
-| `robot.glb` (geometry only, Meshopt) | < 800 KB |
-| `styles.css` | < 5 KB |
+| Asset                                                  | gzipped target |
+| ------------------------------------------------------ | -------------- |
+| `app.js` (tree-shaken Three + GLTFLoader + our code) | ~150 KB        |
+| `robot.glb` (geometry only, Meshopt)                 | < 800 KB       |
+| `styles.css`                                         | < 5 KB         |
 
 The GLB carries **no baked colour textures** — materials are authored in
 Three.js — which is what keeps it under 1 MB.
@@ -333,12 +333,12 @@ split must fail loudly at load, not present as a silently frozen head.
 
 ### 4.2 Split heuristics (starting values, tune against the real mesh)
 
-| Part | Rule |
-|---|---|
-| Head | vertices above Y = 1.55 |
-| Arms | \|X\| beyond torso half-width measured at chest height |
+| Part  | Rule                                                   |
+| ----- | ------------------------------------------------------ |
+| Head  | vertices above Y = 1.55                                |
+| Arms  | \|X\| beyond torso half-width measured at chest height |
 | Elbow | midpoint between shoulder and wrist along the arm axis |
-| Wrist | 88% of the way from shoulder to arm tip |
+| Wrist | 88% of the way from shoulder to arm tip                |
 
 Pivots are placed at the joint centre, not the part's bounding-box centre.
 
@@ -382,18 +382,18 @@ reconstructs blown specular highlights as surface geometry.
 
 From the captured specs. These are set explicitly; do not rely on defaults.
 
-| Param | Value | Why |
-|---|---|---|
-| `image_references` | the 4 views | required |
-| `pose_mode` | `"a-pose"` | the A-pose as a **parameter**, not a prompt hope |
-| `symmetry_mode` | `"on"` | a humanoid is bilaterally symmetric; enforced symmetry makes the left/right split heuristics mirror reliably |
-| `topology` | `"quad"` | quad edge loops cut far more cleanly at joints than triangles |
-| `should_texture` | `false` | geometry-only GLB (also the default) |
-| `should_remesh` | `true` | uniform topology for predictable splitting |
-| `target_polycount` | 40000 | holds the GLB budget without decimating in Blender |
-| `seed` | fixed, recorded per attempt | makes the 6-attempt loop reproducible |
-| `enable_rigging` | `false` | see §4 — we do not want a skinned rig |
-| `enable_animation` | `false` | requires rigging; all motion is authored in code |
+| Param                | Value                       | Why                                                                                                          |
+| -------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `image_references` | the 4 views                 | required                                                                                                     |
+| `pose_mode`        | `"a-pose"`                | the A-pose as a**parameter**, not a prompt hope                                                        |
+| `symmetry_mode`    | `"on"`                    | a humanoid is bilaterally symmetric; enforced symmetry makes the left/right split heuristics mirror reliably |
+| `topology`         | `"quad"`                  | quad edge loops cut far more cleanly at joints than triangles                                                |
+| `should_texture`   | `false`                   | geometry-only GLB (also the default)                                                                         |
+| `should_remesh`    | `true`                    | uniform topology for predictable splitting                                                                   |
+| `target_polycount` | 40000                       | holds the GLB budget without decimating in Blender                                                           |
+| `seed`             | fixed, recorded per attempt | makes the 6-attempt loop reproducible                                                                        |
+| `enable_rigging`   | `false`                   | see §4 — we do not want a skinned rig                                                                      |
+| `enable_animation` | `false`                   | requires rigging; all motion is authored in code                                                             |
 
 `pose_mode` is a documented enum (`a-pose` | `t-pose`), which materially
 de-risks the pose constraint: the A-pose no longer depends on the image
@@ -593,13 +593,13 @@ space, reintroduces exactly that class of bug for no benefit.
 
 Camera, `faceOpacity` and `visorOpacity` are keyed against one normalized `t`.
 
-| Phase | Window | Camera | `faceOpacity` | `visorOpacity` |
-|---|---|---|---|---|
-| A — face | 0.00–0.60s | held at `d0` | 1.00 | 0.00 |
-| B — visor forms | 0.60–1.80s | `d0` → 60% of travel, ease-in-out | 1.00 | 0.00 → 0.80 |
-| C — face recedes | 1.80–2.70s | 60% → 88% | 1.00 → 0.70 | 0.80 → 0.90 |
-| D — settle | 2.70–3.50s | 88% → end, `cubic-bezier(0.16, 1, 0.3, 1)` | 0.70 | 0.90 → 0.92 |
-| marquee reveal | 3.50–3.90s | static | 0.70 | 0.92 |
+| Phase             | Window      | Camera                                       | `faceOpacity` | `visorOpacity` |
+| ----------------- | ----------- | -------------------------------------------- | --------------- | ---------------- |
+| A — face         | 0.00–0.60s | held at`d0`                                | 1.00            | 0.00             |
+| B — visor forms  | 0.60–1.80s | `d0` → 60% of travel, ease-in-out         | 1.00            | 0.00 → 0.80     |
+| C — face recedes | 1.80–2.70s | 60% → 88%                                   | 1.00 → 0.70    | 0.80 → 0.90     |
+| D — settle       | 2.70–3.50s | 88% → end,`cubic-bezier(0.16, 1, 0.3, 1)` | 0.70            | 0.90 → 0.92     |
+| marquee reveal    | 3.50–3.90s | static                                       | 0.70            | 0.92             |
 
 **Phase A is a hold, not an ease — this is the load-bearing detail.** The
 previous design used a single `cubic-bezier(0.16, 1, 0.3, 1)` across the whole
@@ -637,11 +637,11 @@ same class as the §4.2 split heuristics. `d0` then follows:
 const d0 = F / (2 * Math.tan((fov * Math.PI / 180) / 2) * Math.min(aspect, 1));
 ```
 
-| Stage | Camera position | LookAt |
-|---|---|---|
+| Stage                     | Camera position            | LookAt            |
+| ------------------------- | -------------------------- | ----------------- |
 | Start — face fills frame | `(0, yFace, zFace + d0)` | `(0, yFace, 0)` |
-| End — full body | `(0, 1.00, 3.50)` | `(0, 1.00, 0)` |
-| End — chest-up | `(0, 1.45, 1.50)` | `(0, 1.45, 0)` |
+| End — full body          | `(0, 1.00, 3.50)`        | `(0, 1.00, 0)`  |
+| End — chest-up           | `(0, 1.45, 1.50)`        | `(0, 1.45, 0)`  |
 
 `Math.min(aspect, 1)` is the entire responsive story for the opening frame: in
 landscape the square face fills the viewport **height**; in portrait it fills
@@ -741,10 +741,10 @@ const bias = { x: -kx * visibleW, y: -ky * visibleH };
 Negative `camera.x` pushes the robot **right** in frame; negative `camera.y`
 pushes it **up**.
 
-| Breakpoint | `kx` | `ky` |
-|---|---|---|
-| ≥900px | `0.12` | `0.10` |
-| <900px | `0` | `0.06` |
+| Breakpoint | `kx`   | `ky`   |
+| ---------- | -------- | -------- |
+| ≥900px    | `0.12` | `0.10` |
+| <900px     | `0`    | `0.06` |
 
 Both are starting values to tune against the real mesh — the model's bounding
 box is not symmetric about its origin once the arms are posed, so the visual
@@ -773,14 +773,14 @@ Neck yaw ±22°, pitch ±14°. Torso receives 30% of neck yaw as counter-rotatio
 
 ## 7. Degradation and performance
 
-| Condition | Behaviour |
-|---|---|
-| No WebGL | Face poster cross-fades to `robot-poster.webp` — see below |
-| `prefers-reduced-motion` | **Composited final state, static** — see below |
-| Keyboard input during intro | Jump to settled state, reveal marquee (§2) |
-| Touch (no cursor) | Intro + blink + idle; lookAt disabled |
-| Dialog open | Render loop paused |
-| Low-end device | DPR capped at 1.5, frame rate capped at 30 |
+| Condition                   | Behaviour                                                    |
+| --------------------------- | ------------------------------------------------------------ |
+| No WebGL                    | Face poster cross-fades to`robot-poster.webp` — see below |
+| `prefers-reduced-motion`  | **Composited final state, static** — see below        |
+| Keyboard input during intro | Jump to settled state, reveal marquee (§2)                  |
+| Touch (no cursor)           | Intro + blink + idle; lookAt disabled                        |
+| Dialog open                 | Render loop paused                                           |
+| Low-end device              | DPR capped at 1.5, frame rate capped at 30                   |
 
 **Without WebGL the reveal still happens, just not in 3D.** The face poster is
 already painted (it is the LCP element), so a failed context is not a blank
