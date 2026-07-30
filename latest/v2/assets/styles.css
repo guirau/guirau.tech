@@ -1,0 +1,73 @@
+/* guirau.tech v2 — every value from docs/DESIGN-SYSTEM.md. Do not add a third
+   background value, a box-shadow, or a font weight of 500 or 700. */
+
+@font-face {
+  font-family: 'Geist';
+  src: url('fonts/geist-sans.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('fonts/geist-mono.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  /* Colour — two backgrounds, total. §1.1 */
+  --surface-0: #000000;
+  --surface-1: #1D1D1F;
+  --text-primary: #F5F5F7;
+  --text-secondary: #86868B;
+  --accent: #0071E3;        /* FILL ONLY — `color: var(--accent)` fails AA §1.4 */
+  --accent-hover: #0077ED;  /* lighter, not darker */
+  --accent-text: #2997FF;   /* the text colour for links on black */
+  --on-accent: #FFFFFF;
+  --hairline: rgba(255, 255, 255, 0.10);
+
+  /* Type — six roles, §2.4 */
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+  --text-eyebrow: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
+  --text-headline: clamp(2.5rem, 1.2rem + 5.6vw, 4rem);
+  --text-body: 1.0625rem;
+  --text-caption: 0.8125rem;
+
+  /* Shape — §4.1 */
+  --radius-card: 28px;
+  --radius-pill: 980px;
+  --radius-control: 12px;
+
+  /* Space — 8pt scale, §4.2 */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 64px;
+  --gutter: clamp(24px, 5vw, 80px);
+  --safe-bottom: clamp(24px, 3vh, 48px);
+
+  /* Motion — everything except the intro sequence, which spec §6.1 owns */
+  --duration-fast: 150ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.47;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* One screen. No page scroll. */
+body { overflow: hidden; }
