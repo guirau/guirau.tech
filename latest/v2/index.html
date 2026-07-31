@@ -117,7 +117,39 @@
     <div class="dialog__panel">
       <button class="dialog__close" type="button" aria-label="Close">&times;</button>
       <h2 id="contact-title" class="dialog__title">Contact</h2>
-      <div class="dialog__body"></div>
+      <div class="dialog__body">
+        <form id="contact-form" action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="b1d8beed-d4f5-4bac-8c07-356932d30828">
+          <input type="hidden" name="subject" value="New enquiry from guirau.tech">
+
+          <!-- Honeypot: bots fill every field they find; humans never see this. -->
+          <input type="checkbox" name="botcheck" class="visually-gone" tabindex="-1" autocomplete="off">
+
+          <label class="field">
+            <span class="field__label">Name</span>
+            <input class="field__input" type="text" name="name" required autocomplete="name">
+          </label>
+
+          <label class="field">
+            <span class="field__label">Email</span>
+            <input class="field__input" type="email" name="email" required autocomplete="email">
+          </label>
+
+          <label class="field">
+            <span class="field__label">Message</span>
+            <textarea class="field__input" name="message" rows="5" required></textarea>
+          </label>
+
+          <div class="h-captcha" data-captcha="true"></div>
+
+          <button class="link link--button" type="submit">Send message</button>
+        </form>
+
+        <p class="dialog__alt">
+          Or email directly:
+          <a class="link" href="mailto:alejandro.guirau@gmail.com">alejandro.guirau@gmail.com</a>
+        </p>
+      </div>
     </div>
   </dialog>
 

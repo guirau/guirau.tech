@@ -42,3 +42,18 @@ for (const dialog of dialogs.values()) {
 }
 
 export { open };
+
+// hCaptcha is ~50 KB of third-party script. It costs nothing at page load
+// because it is fetched the first time Contact opens, and never again.
+let captchaLoaded = false;
+
+document.addEventListener('dialog:open', (event) => {
+  if (event.detail.id !== 'contact' || captchaLoaded) return;
+  captchaLoaded = true;
+
+  const script = document.createElement('script');
+  script.src = 'https://web3forms.com/client/script.js';
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+});

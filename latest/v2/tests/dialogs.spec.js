@@ -127,3 +127,70 @@ test('every offer CTA closes Services and opens Contact', async ({ page }) => {
   await expect(page.locator('#services-dialog')).toBeHidden();
   await expect(page.locator('#contact-dialog')).toBeVisible();
 });
+
+test('contact form posts to Web3Forms with a real access key', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.marquee__card [data-open="contact"]').click();
+
+  const form = page.locator('#contact-form');
+  await expect(form).toHaveAttribute('action', 'https://api.web3forms.com/submit');
+  await expect(form).toHaveAttribute('method', 'POST');
+
+  const key = await page.locator('input[name="access_key"]').inputValue();
+  expect(key, 'access_key must be the real UUID from prerequisite H1')
+    .toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+});
+
+test('contact has name, email and message fields, all required', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.marquee__card [data-open="contact"]').click();
+  for (const name of ['name', 'email', 'message']) {
+    const field = page.locator(`#contact-form [name="${name}"]`);
+    await expect(field).toBeVisible();
+    await expect(field).toHaveAttribute('required', '');
+  }
+});
+
+test('a honeypot field exists and is hidden from humans', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.marquee__card [data-open="contact"]').click();
+  const honeypot = page.locator('#contact-form [name="botcheck"]');
+  await expect(honeypot).toBeHidden();
+});
+
+test('the email address is also offered as a plain mailto link', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.marquee__card [data-open="contact"]').click();
+  await expect(page.locator('#contact-dialog a[href^="mailto:"]'))
+    .toHaveAttribute('href', 'mailto:alejandro.guirau@gmail.com');
+});
+
+test('after an offer CTA swaps dialogs, Esc returns focus to the Services trigger', async ({ page }) => {
+  // Pins the focus hand-off the close-then-showModal ordering produces:
+  // Services restores focus to its trigger synchronously, and Contact
+  // snapshots that as its own restore target. A reorder of close()/
+  // showModal() would break this without failing any other test.
+  await page.goto('/');
+  await page.locator('.marquee__card [data-open="services"]').click();
+  await page.locator('.offer__cta').first().click();
+  await expect(page.locator('#contact-dialog')).toBeVisible();
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#contact-dialog')).toBeHidden();
+  await expect(page.locator('.marquee__card [data-open="services"]')).toBeFocused();
+});
+
+test('hCaptcha is not fetched until Contact is first opened', async ({ page }) => {
+  const captchaRequests = [];
+  page.on('request', (r) => {
+    if (r.url().includes('hcaptcha.com')) captchaRequests.push(r.url());
+  });
+
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  expect(captchaRequests, 'must cost nothing at initial page load').toEqual([]);
+
+  await page.locator('.marquee__card [data-open="contact"]').click();
+  await page.waitForRequest((r) => r.url().includes('hcaptcha.com'), { timeout: 5000 });
+  expect(captchaRequests.length).toBeGreaterThan(0);
+});
