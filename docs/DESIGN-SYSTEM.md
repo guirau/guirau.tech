@@ -294,14 +294,43 @@ On a short laptop viewport the arithmetic gets tight — 1024×640, three lines:
 
 That leaves ~196px for the `1fr` void, against a spec that wants the robot in
 the upper ~60% (384px). **The robot's lower third would collide with the
-eyebrow.** Not yet resolved, and it must be settled before the grid is written.
+eyebrow.**
 
-The lever is the **cap, not the leading** — 1.08 is [measured] from Apple and
-tightening it further would be inventing a number, whereas 20ch is [tune] and
-was set before line height existed. Widening to ~28ch drops the headline to 2
-lines and returns ~69px. A `clamp()` on the headline that also reads `dvh`, or
-a `@media (max-height: 700px)` step-down, are the other two candidates. Pick one
-when the page is built and the wrap can be seen rather than computed.
+**Resolved in Task 14**, against real renders at both candidate viewports
+(1024×640 and 1280×720). Measured headroom before any fix: **182px** at
+1024×640, **262px** at 1280×720, both short of the 384px floor. Neither
+single-lever candidate closes the gap alone. Widening the cap to 28ch does
+nothing at 1024px width, because the grid column binds before the cap does,
+and only helps once the viewport is wide enough for the cap to bite (it
+recovers headroom at 1280px but not at 1024px). A `clamp()` reading `dvh`
+saturates at its 4rem ceiling on both viewports and barely moves the number
+either. The `@media (max-height: 760px)` step-down alone reaches two lines
+and clears 1280×720, but falls short at 1024×640 by ~39px (344.64px measured
+against the 384px floor).
+
+**The decision is the combination**: the step-down's fixed 2.5rem headline
+(42.5px computed, above the 40px floor §3 requires) plus the wider 28ch cap,
+plus trimming the same rhythm tokens the step-down already touches
+(`--space-4`, card padding, eyebrow margin) to close the remaining gap. The
+bound is `@media (max-height: 760px) and (min-width: 1000px)`, one pixel past
+Case 3's `max-width: 999px` (§2.6), not the 900px a first pass reached for,
+because at 900px this query started matching short landscape phones (e.g.
+926×428) that Case 3 already owns, and being later in source order it
+silently overrode Case 3's own compression. `--safe-bottom` is left out of
+the trim for the same reason: Playwright's default "Desktop Chrome" viewport
+is 1280×720, one of the two viewports this fix targets, and the existing
+safe-area-inset test reads that default expecting the un-compressed
+`clamp()` value. The result, now in `assets/styles.css`: **392.64px**
+headroom at 1024×640, **472.64px** at 1280×720, both clearing 384px.
+
+**Known gap, left unresolved by this decision:** viewports 900-999px wide
+by 500-760px tall (e.g. 960×600) match neither this query nor Case 3
+(`max-width: 999px` and `max-height: 499px`) and fall back to the base
+layout at full clamp scale, measured at 142.8px headroom, below the 384px
+floor. The footer stays visible there, so it is a headroom gap rather than
+an overflow bug. Neither of Task 14's two target viewports lands in that
+band, so it is recorded here rather than folded into a bound the render
+work didn't cover.
 
 ---
 

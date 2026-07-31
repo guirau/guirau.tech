@@ -895,6 +895,10 @@ otherwise used identically.
    The rejected alternative — an amber halo ramping to black across phases B–C
    — remains available if a fully black opening reads as too austere, but it
    costs the page its single-colour-moment rule (§4.5).
-9. **Short-viewport lever** — `DESIGN-SYSTEM.md` §2.5 records three candidate
-   fixes for the headline collision and does not pick one. It must be resolved
-   together with the §2.6 landscape breakpoint, against a real render.
+9. **Short-viewport lever** — resolved in Task 14, together with the §2.6
+   landscape breakpoint, against real renders at 1024×640 and 1280×720. None
+   of the three candidates `DESIGN-SYSTEM.md` §2.5 recorded closed the
+   384px robot-stage headroom gap alone; the shipped fix combines the
+   wider-cap and step-down candidates and retunes the step-down's bound so
+   it no longer overlaps Case 3. See `DESIGN-SYSTEM.md` §2.5 for the
+   measured numbers and the reasoning.

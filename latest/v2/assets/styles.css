@@ -118,7 +118,10 @@ body { overflow: hidden; }
   font-size: var(--text-headline);
   font-weight: 600;
   line-height: 1.08;
-  max-width: 20ch;          /* [tune] — Task 14 resolves this against a render */
+  max-width: 20ch;          /* Task 14: resolved at full height/width; the
+                                short-viewport override below widens this to
+                                28ch, the one place the wider cap has room to
+                                act (§2.5). */
   text-wrap: balance;
 }
 
@@ -465,4 +468,54 @@ body { overflow: hidden; }
   .marquee__eyebrow  { font-size: 1rem; margin-bottom: var(--space-1); }
   .marquee__headline { font-size: 1.5rem; max-width: 32ch; }
   .marquee__card     { padding: var(--space-1) var(--space-2); }
+}
+
+/* ---- Short-viewport headline collision, DESIGN-SYSTEM §2.5 / spec §9 item 9 ----
+   Task 14 decision: neither candidate alone clears the 384px robot-stage
+   headroom at 1024x640 (measured 182px headroom before this rule). Lever 1
+   (widen the cap to 28ch) does nothing at 1024px width because the grid
+   column already binds before the cap does; it only helps once the column
+   is wide enough for the cap to matter (confirmed at 1280x720). Lever 2
+   (dvh-aware clamp) saturates at its 4rem ceiling on both these viewports,
+   so it barely moves the needle either. Lever 3 (fixed step-down) alone
+   gets to two lines and clears 1280x720 but falls short at 1024x640 by
+   ~39px (344.64px measured against the 384px floor). So this combines
+   lever 1's wider cap with lever 3's step-down, plus trimming the same
+   rhythm tokens the step-down already touches (--space-4, card padding,
+   eyebrow margin) to close the remaining gap. Headline stays at 42.5px,
+   above the 40px floor the gradient's darkest stop needs for AA (§3).
+
+   The bound is min-width: 1000px, one past Case 3's max-width: 999px
+   (§2.6), not the 900px the candidate started from: at 900px this query
+   started matching short landscape phones like 926x428 too, and being
+   later in the source it silently won over Case 3's own compression,
+   undoing it. --safe-bottom is left untouched for the same coupling
+   reason — this query also matches the Playwright "Desktop Chrome"
+   default viewport (1280x720, one of the two viewports this fix targets),
+   and the pre-existing safe-area-inset test reads that default expecting
+   the un-compressed clamp() value.
+
+   Known gap: 900-999px wide by 500-760px tall (e.g. 960x600) matches
+   neither this query nor Case 3 (max-width: 999px, max-height: 499px) and
+   falls back to the base layout at full clamp scale (measured 142.8px
+   headroom, footer still visible so not an overflow bug, just uncollapsed).
+   Neither of the two target viewports in this fix lands there; left
+   uncovered rather than widened past what was measured. */
+@media (max-height: 760px) and (min-width: 1000px) {
+  .marquee__headline { font-size: 2.5rem; max-width: 28ch; }
+  .marquee__eyebrow  { font-size: 1.25rem; margin-bottom: var(--space-1); }
+  .marquee { --gutter: 32px; --space-4: 8px; }
+  .marquee__card { padding: var(--space-1) var(--space-2); }
+}
+
+/* Below the AA-large threshold the gradient's darkest stop (3.41:1) is not
+   legible, so short landscape drops the gradient rather than the contrast.
+   Same media query as Case 3 (999px width bound) — a narrower bound here
+   would miss the Pro Max landscape viewport Case 3 exists to catch. */
+@media (max-width: 999px) and (max-height: 499px) {
+  .marquee__headline {
+    background-image: none;
+    -webkit-text-fill-color: var(--text-primary);
+    color: var(--text-primary);
+  }
 }

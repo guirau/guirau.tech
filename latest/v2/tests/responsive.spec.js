@@ -82,3 +82,17 @@ test('the marquee respects safe-area insets without losing its design gutter', a
   expect(padding.left).toBeGreaterThanOrEqual(24);
   expect(padding.bottom).toBeGreaterThanOrEqual(24);
 });
+
+// Spec §2.6 / DESIGN-SYSTEM §2.5: the robot needs vertical room above the
+// marquee. This asserts the headroom the collision was measured against.
+const MIN_STAGE_HEADROOM_PX = 384;
+
+for (const { w, h } of [{ w: 1024, h: 640 }, { w: 1280, h: 720 }]) {
+  test(`${w}x${h}: marquee leaves >= ${MIN_STAGE_HEADROOM_PX}px for the robot`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await page.goto('/');
+    const top = await page.locator('.marquee__text')
+      .evaluate((el) => el.getBoundingClientRect().top);
+    expect(top, 'space above the eyebrow').toBeGreaterThanOrEqual(MIN_STAGE_HEADROOM_PX);
+  });
+}
