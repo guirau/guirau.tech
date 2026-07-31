@@ -235,3 +235,57 @@ body { overflow: hidden; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---- Dialogs ----
+   <dialog> defaults to display:none and shrink-to-fit, so size is explicit. */
+.dialog {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  max-width: 100vw;
+  max-height: 100dvh;
+  overflow: visible;
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(20px);
+}
+
+.dialog__panel {
+  position: relative;
+  width: min(720px, calc(100vw - 2 * var(--space-3)));
+  max-height: min(80dvh, 720px);
+  overflow-y: auto;
+  overscroll-behavior: contain;  /* keep panel scroll from chaining to the page */
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  color: var(--text-primary);
+}
+
+.dialog__title {
+  margin: 0 0 var(--space-4);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.19;
+}
+
+.dialog__close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.dialog__close:hover { color: var(--text-primary); }
