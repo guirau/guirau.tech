@@ -9,6 +9,11 @@ const dialogs = new Map(
 function open(id) {
   const dialog = dialogs.get(id);
   if (!dialog) return;
+  // Only one dialog at a time. An offer CTA inside Services must close it
+  // first, or Contact stacks on top and Esc unwinds through two layers.
+  for (const other of dialogs.values()) {
+    if (other !== dialog && other.open) other.close();
+  }
   dialog.showModal();
   document.dispatchEvent(new CustomEvent('dialog:open', { detail: { id } }));
 }

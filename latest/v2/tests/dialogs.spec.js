@@ -4,7 +4,9 @@ for (const id of ['services', 'contact']) {
   test(`${id}: opens, traps focus, Esc closes, focus returns to trigger`, async ({ page }) => {
     await page.goto('/');
 
-    const trigger = page.locator(`[data-open="${id}"]`);
+    // Scoped to the marquee card: offer CTAs inside Services also carry
+    // data-open="contact", so the bare attribute selector is no longer unique.
+    const trigger = page.locator(`.marquee__card [data-open="${id}"]`);
     const dialog = page.locator(`#${id}-dialog`);
 
     await expect(dialog).toBeHidden();
@@ -22,10 +24,10 @@ for (const id of ['services', 'contact']) {
 
   test(`${id}: the close button also restores focus`, async ({ page }) => {
     await page.goto('/');
-    await page.locator(`[data-open="${id}"]`).click();
+    await page.locator(`.marquee__card [data-open="${id}"]`).click();
     await page.locator(`#${id}-dialog .dialog__close`).click();
     await expect(page.locator(`#${id}-dialog`)).toBeHidden();
-    await expect(page.locator(`[data-open="${id}"]`)).toBeFocused();
+    await expect(page.locator(`.marquee__card [data-open="${id}"]`)).toBeFocused();
   });
 }
 
@@ -68,4 +70,60 @@ test('the close button stays put while the body scrolls', async ({ page }) => {
   const after = await close.boundingBox();
   expect(after.y, 'close button must not move when the body scrolls').toBe(before.y);
   expect(after.x).toBe(before.x);
+});
+
+test('services shows four offers with prices from CONTENT.md', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-open="services"]').click();
+
+  const expected = [
+    ['AI Strategy Consultation', 'From $199', '3 days'],
+    ['n8n Workflow Automation', 'From $497', '5 days'],
+    ['Custom AI Agent', 'From $897', '3 tiers'],
+    ['AI App — End-to-End Build', '$8,997', '5 weeks'],
+  ];
+
+  const cards = page.locator('.offer');
+  await expect(cards).toHaveCount(4);
+
+  for (const [i, [title, price, duration]] of expected.entries()) {
+    await expect(cards.nth(i).locator('.offer__title')).toHaveText(title);
+    await expect(cards.nth(i).locator('.offer__meta')).toContainText(price);
+    await expect(cards.nth(i).locator('.offer__meta')).toContainText(duration);
+  }
+});
+
+test('prices and durations are the only mono text', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-open="services"]').click();
+  const monoClasses = await page.evaluate(() =>
+    [...document.querySelectorAll('#services-dialog *')]
+      .filter((el) => getComputedStyle(el).fontFamily.includes('Geist Mono'))
+      .map((el) => el.className)
+  );
+  expect(monoClasses.every((c) => c.includes('offer__meta'))).toBe(true);
+  expect(monoClasses.length).toBe(4);
+});
+
+test('Santander is withheld from the credentials list', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-open="services"]').click();
+  const body = await page.locator('#services-dialog').textContent();
+  expect(body).not.toContain('Santander');
+  for (const employer of ['HelloFresh', 'Hewlett Packard Enterprise',
+                          'Telefónica', 'Enso', 'Masterschool']) {
+    expect(body).toContain(employer);
+  }
+});
+
+test('every offer CTA closes Services and opens Contact', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-open="services"]').click();
+
+  const ctas = page.locator('.offer__cta');
+  await expect(ctas).toHaveCount(4);
+
+  await ctas.first().click();
+  await expect(page.locator('#services-dialog')).toBeHidden();
+  await expect(page.locator('#contact-dialog')).toBeVisible();
 });

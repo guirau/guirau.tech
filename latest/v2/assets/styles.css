@@ -297,3 +297,68 @@ body { overflow: hidden; }
 }
 
 .dialog__close:hover { color: var(--text-primary); }
+
+/* ---- Services offers ---- */
+.dialog__lede {
+  margin: 0 0 var(--space-5);
+  color: var(--text-secondary);
+}
+
+.offer {
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.offer__title {
+  margin: 0 0 var(--space-1);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.19;
+}
+
+.offer__tagline {
+  margin: 0 0 var(--space-1);
+  color: var(--text-secondary);
+}
+
+/* Geist Mono is the typographic tell for money and time — nothing else. */
+.offer__meta {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;          /* mono is 400, not 500 — §2.4 */
+  color: var(--text-primary);
+}
+
+.offer__list {
+  margin: 0 0 var(--space-3);
+  padding-left: 1.2em;
+  color: var(--text-secondary);
+}
+
+.offer__list li { margin-bottom: var(--space-1); }
+
+.offer__cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-1);
+  background: none;
+  border: 0;
+  color: var(--accent-text);
+  font-family: inherit;
+  font-size: var(--text-body);
+  font-weight: 400;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.offer__cta:hover { opacity: 0.8; }
+
+.dialog__credentials {
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--hairline);
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+}
