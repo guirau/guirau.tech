@@ -28,7 +28,10 @@ test('Contact is the only accent-filled control on the page', async ({ page }) =
     document.body.append(probe);
     const target = getComputedStyle(probe).backgroundColor;
     probe.remove();
+    // Scoped to the page surface: the marquee owns the one-accent-pill rule.
+    // Inside the modal, the submit is the same conversion action continuing.
     return [...document.querySelectorAll('button, a')]
+      .filter((el) => !el.closest('dialog'))
       .filter((el) => getComputedStyle(el).backgroundColor === target)
       .map((el) => el.textContent.trim());
   });
