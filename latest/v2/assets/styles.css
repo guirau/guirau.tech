@@ -386,14 +386,18 @@ body { overflow: hidden; }
   font-size: var(--text-body);
 }
 
-.field__input:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
+/* No .field__input:focus-visible override — the global :focus-visible rule
+   (outline 2px, offset 3px, §6.1) already covers inputs and textareas. */
 
-/* Honeypot. Not `display:none` — some bots skip those; this is off-canvas
-   and out of the tab order, so it is invisible to humans and assistive tech
-   while still being a field a scraper will happily fill. */
+/* Honeypot. Not `display:none` — some bots skip those. Zero-size dimensions
+   (not just off-canvas positioning) are load-bearing: Playwright's, and by
+   extension most assistive tech's, definition of "hidden" requires a
+   zero-area box, not just opacity or off-screen placement. Do not restore
+   width/height to make this "less hacky" — that will silently fail
+   dialogs.spec.js's honeypot-hidden assertion. `aria-hidden="true"` on the
+   input (see index.html) removes it from the accessibility tree; it is
+   already tabindex="-1", so this is not the disallowed
+   aria-hidden-on-a-focusable-element case. */
 .visually-gone {
   position: absolute;
   left: -9999px;
