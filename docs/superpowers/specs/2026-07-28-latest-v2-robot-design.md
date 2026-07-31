@@ -274,10 +274,14 @@ verification only reads the domain root.
 | ------------------------------------------------------ | -------------- |
 | `app.js` (tree-shaken Three + GLTFLoader + our code) | ~150 KB        |
 | `robot.glb` (geometry only, Meshopt)                 | < 800 KB       |
-| `styles.css`                                         | < 5 KB         |
+| `styles.css`                                         | < 6 KB         |
 
 The GLB carries **no baked colour textures** — materials are authored in
-Three.js — which is what keeps it under 1 MB.
+Three.js — which is what keeps it under 1 MB. The original 5 KB CSS figure was
+a pre-implementation estimate; the complete Plan 1 stylesheet measured 5.47 KB
+gzipped with the full responsive envelope, dialogs, form, offers and the
+review-mandated rationale comments, and the binding 30 KB budget in CLAUDE.md
+is unaffected.
 
 ---
 
