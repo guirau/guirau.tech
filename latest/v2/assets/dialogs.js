@@ -44,16 +44,19 @@ for (const dialog of dialogs.values()) {
 export { open };
 
 // hCaptcha is ~50 KB of third-party script. It costs nothing at page load
-// because it is fetched the first time Contact opens, and never again.
+// because it is fetched the first time Contact opens. The loaded flag is
+// only latched on success: if the fetch fails (offline, 404), reopening
+// Contact retries instead of silently never loading the captcha again.
 let captchaLoaded = false;
 
 document.addEventListener('dialog:open', (event) => {
   if (event.detail.id !== 'contact' || captchaLoaded) return;
-  captchaLoaded = true;
 
   const script = document.createElement('script');
   script.src = 'https://web3forms.com/client/script.js';
   script.async = true;
   script.defer = true;
+  script.addEventListener('load', () => { captchaLoaded = true; });
+  script.addEventListener('error', () => { script.remove(); });
   document.head.appendChild(script);
 });

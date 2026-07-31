@@ -180,17 +180,31 @@ test('after an offer CTA swaps dialogs, Esc returns focus to the Services trigge
   await expect(page.locator('.marquee__card [data-open="services"]')).toBeFocused();
 });
 
-test('hCaptcha is not fetched until Contact is first opened', async ({ page }) => {
-  const captchaRequests = [];
-  page.on('request', (r) => {
-    if (r.url().includes('hcaptcha.com')) captchaRequests.push(r.url());
-  });
-
+test('the captcha script is not injected until Contact is first opened', async ({ page }) => {
   await page.goto('/');
   await page.waitForLoadState('networkidle');
-  expect(captchaRequests, 'must cost nothing at initial page load').toEqual([]);
 
+  const before = await page.locator('head script[src*="web3forms.com/client"]').count();
+  expect(before, 'must cost nothing at initial page load').toBe(0);
+
+  // Registered before the click so the event can't fire before we're
+  // listening. Waiting for it (rather than page-level 'networkidle', which
+  // is sticky per navigation and would resolve instantly on a second call)
+  // lets the script's load event actually fire before we reopen, so the
+  // next block exercises the latch's post-success guarantee rather than the
+  // accepted in-flight race (reopening while the first request is still
+  // pending can still inject a second copy for that sub-second window — by
+  // design, see dialogs.js).
+  const scriptFinished = page.waitForEvent(
+    'requestfinished',
+    (r) => r.url().includes('web3forms.com/client')
+  );
   await page.locator('.marquee__card [data-open="contact"]').click();
-  await page.waitForRequest((r) => r.url().includes('hcaptcha.com'), { timeout: 5000 });
-  expect(captchaRequests.length).toBeGreaterThan(0);
+  await expect(page.locator('head script[src*="web3forms.com/client"]')).toHaveCount(1);
+  await scriptFinished;
+
+  // Reopening must not inject a second copy.
+  await page.keyboard.press('Escape');
+  await page.locator('.marquee__card [data-open="contact"]').click();
+  await expect(page.locator('head script[src*="web3forms.com/client"]')).toHaveCount(1);
 });
