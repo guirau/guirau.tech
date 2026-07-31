@@ -39,6 +39,15 @@ for (const { w, h } of LANDSCAPE) {
 
     expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
     expect(await footerFullyVisible(page)).toBe(true);
+
+    // The compression is the point of Case 3 — pin one representative token
+    // (headline size) and the compressed gutter so deleting the block fails.
+    const compressed = await page.locator('.marquee__headline').evaluate((el) => ({
+      fontSize: parseFloat(getComputedStyle(el).fontSize),
+      gutter: parseFloat(getComputedStyle(document.querySelector('.marquee')).paddingLeft),
+    }));
+    expect(compressed.fontSize, 'Case 3 compresses the headline').toBeLessThanOrEqual(28);
+    expect(compressed.gutter, 'Case 3 compresses the gutter').toBeLessThanOrEqual(20);
   });
 }
 
