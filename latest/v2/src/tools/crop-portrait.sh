@@ -10,6 +10,14 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 SRC="../../docs/reference/me.jpg"
 
+# The crop box below is tuned to THIS 1600x1600 export. A different source
+# (re-export, swap) must fail loudly, not silently re-frame the face.
+DIMS="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$SRC")"
+[ "$DIMS" = "1600,1600" ] || {
+  echo "source is ${DIMS}, expected 1600,1600 -- re-measure the crop landmarks before regenerating" >&2
+  exit 1
+}
+
 # 755x755 square from a 1600x1600 source, offset +432,+238.
 #
 # The brief's landmarks (face centre x~810, hairline y~50, chin y~960) were
