@@ -153,3 +153,85 @@ body { overflow: hidden; }
     background-image: none;
   }
 }
+
+/* ---- Four rows now: spacer, text, links, footer ---- */
+.marquee { grid-template-rows: 1fr auto auto auto; }
+.marquee__text   { grid-area: 2 / 1 / 3 / 3; align-self: end; }
+.marquee__social { grid-area: 3 / 1; align-self: center; }
+.marquee__card   { grid-area: 3 / 2; align-self: center; justify-self: end; }
+.marquee__footer { grid-area: 4 / 1 / 5 / 3; }
+
+.marquee__social {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+/* ---- The raised card: depth from a luminance step, never a shadow, §4.1 ---- */
+.marquee__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+}
+
+/* ---- Controls ---- */
+.link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 var(--space-1);
+  color: var(--accent-text);
+  font-size: var(--text-body);
+  font-weight: 400;
+  text-decoration: none;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.link--button {
+  background: none;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  border: 0;
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: var(--text-body);
+  font-weight: 400;          /* buttons are 400, never 600 — §2.4 */
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+
+/* ---- States, §6.1 ---- */
+.pill:hover { background-color: var(--accent-hover); }
+.link:hover { opacity: 0.8; }
+.pill:active, .link:active { transform: scale(0.95); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);   /* a ring, not text — 3:1 under SC 1.4.11 */
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
