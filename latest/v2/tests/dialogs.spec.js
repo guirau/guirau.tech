@@ -39,3 +39,33 @@ test('clicking the backdrop closes the dialog', async ({ page }) => {
   await page.mouse.click(2, 2);
   await expect(dialog).toBeHidden();
 });
+
+test('clicking inside the panel does not close the dialog', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-open="services"]').click();
+  const dialog = page.locator('#services-dialog');
+  await dialog.locator('.dialog__panel').click({ position: { x: 40, y: 40 } });
+  await expect(dialog).toBeVisible();
+});
+
+test('the close button stays put while the body scrolls', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-open="services"]').click();
+  const close = page.locator('#services-dialog .dialog__close');
+
+  // Fill first: content injection legitimately resizes and recentres the dialog.
+  await page.locator('#services-dialog .dialog__body').evaluate((el) => {
+    el.innerHTML = '<p>filler</p>'.repeat(400);
+  });
+  const before = await close.boundingBox();
+
+  // Now scroll every scrollable region inside the dialog. Only .dialog__body
+  // should be one, and scrolling it must not move the chrome.
+  await page.locator('#services-dialog').evaluate((el) => {
+    el.querySelectorAll('*').forEach((n) => { n.scrollTop = 500; });
+  });
+
+  const after = await close.boundingBox();
+  expect(after.y, 'close button must not move when the body scrolls').toBe(before.y);
+  expect(after.x).toBe(before.x);
+});

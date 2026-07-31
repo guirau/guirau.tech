@@ -249,6 +249,7 @@ body { overflow: hidden; }
 
 .dialog::backdrop {
   background: rgba(0, 0, 0, 0.72);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
 
@@ -256,13 +257,20 @@ body { overflow: hidden; }
   position: relative;
   width: min(720px, calc(100vw - 2 * var(--space-3)));
   max-height: min(80dvh, 720px);
-  overflow-y: auto;
-  overscroll-behavior: contain;  /* keep panel scroll from chaining to the page */
+  display: flex;
+  flex-direction: column;
   padding: var(--space-5) var(--space-4) var(--space-4);
   background: var(--surface-1);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-card);
   color: var(--text-primary);
+}
+
+/* The body scrolls, not the panel, so the close button and title stay put. */
+.dialog__body {
+  min-height: 0;   /* let the flex child shrink below content height */
+  overflow-y: auto;
+  overscroll-behavior: contain;  /* keep body scroll from chaining to the page */
 }
 
 .dialog__title {
