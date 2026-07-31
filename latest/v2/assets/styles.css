@@ -67,6 +67,7 @@ html, body {
   line-height: 1.47;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* One screen. No page scroll. */
@@ -519,3 +520,11 @@ body { overflow: hidden; }
     color: var(--text-primary);
   }
 }
+
+/* ---- Optical tracking, §2.3 ----
+   Set by eye against a real render, NOT copied from Apple. Geist has no
+   optical sizing axis, so their curve would be wrong at both ends. */
+.marquee__headline { letter-spacing: -0.02em; }
+.marquee__eyebrow  { letter-spacing: -0.01em; }
+.offer__meta       { letter-spacing: 0; }
+body               { letter-spacing: -0.005em; }

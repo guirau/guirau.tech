@@ -188,17 +188,28 @@ and gets pulled in. Geist has no optical sizing, so the corrections it needs are
 different in both magnitude and direction.
 
 What transfers is the principle: **tracking is a per-size optical correction,
-set by eye against rendered text.** Starting points, all **[tune]**:
+set by eye against rendered text.**
+
+**Final values, [measured] against Geist at the clamp extremes** (headline
+and eyebrow judged at both the `--text-headline`/`--text-eyebrow` clamp
+ceiling, a 1920×1080 render, and the clamp floor, a 320×568 render; body
+judged in the marquee's link row and footer; `.offer__meta` mono judged in
+the open Services dialog):
 
 | Role | Tracking |
 |---|---|
 | Headline 40–64px | `-0.02em` |
-| Tagline 22–28px | `-0.01em` |
-| Body / links 17px | `0` |
-| Caption 13px | `0` |
+| Eyebrow 22–28px | `-0.01em` |
+| Body / links 17px | `-0.005em` |
+| Offer meta (mono) 13px | `0` |
 
-Tune these against real rendered copy before shipping and record the final
-values here.
+None of the four needed adjustment from their starting values. At 64px the
+headline reads tight but not cramped, letterforms stay distinct at the 40px
+floor, the body's near-neutral tracking neither loosens nor cramps the link
+row and footer legal string, and the mono meta line reads cleanly at 0, which
+matches the general expectation that monospace faces want zero or slightly
+positive tracking rather than the negative correction display and body sizes
+need.
 
 ### 2.4 Scale
 
@@ -294,7 +305,9 @@ On a short laptop viewport the arithmetic gets tight — 1024×640, three lines:
 
 That leaves ~196px for the `1fr` void, against a spec that wants the robot in
 the upper ~60% (384px). **The robot's lower third would collide with the
-eyebrow.**
+eyebrow.** This table is hand arithmetic, directional rather than exact; the
+real render measured below came in at 182px, close enough to confirm the
+collision without needing the estimate reconciled line by line.
 
 **Resolved in Task 14**, against real renders at both candidate viewports
 (1024×640 and 1280×720). Measured headroom before any fix: **182px** at
