@@ -211,6 +211,15 @@ matches the general expectation that monospace faces want zero or slightly
 positive tracking rather than the negative correction display and body sizes
 need.
 
+The clamp extremes are not the smallest the headline and eyebrow ever render.
+Case 3's compression (§2.6) steps them down further, to a 24px headline and a
+16px eyebrow at 926×428, and the short-laptop step-down sets the eyebrow to
+20px at 1024×640. Checked against renders at both viewports, `-0.02em` and
+`-0.01em` still read cleanly at these smaller sizes, no visible cramping, so
+the same values carry through without a compressed-size override. `.dialog__title`
+and `.offer__title` set no tracking of their own and inherit the body value of
+`-0.005em` by design, consistent with the rest of the dialog copy.
+
 ### 2.4 Scale
 
 v2 is one screen, so it needs six roles, not a full ramp.
