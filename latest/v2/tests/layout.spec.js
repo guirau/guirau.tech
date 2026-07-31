@@ -41,3 +41,27 @@ test('display type is weight 600 and never 700 or 500', async ({ page }) => {
   );
   expect(weights.every((w) => w === '600')).toBe(true);
 });
+
+test('headline declares a solid colour before the gradient claims it', async ({ page }) => {
+  await page.goto('/');
+  const css = await page.evaluate(async () => {
+    const res = await fetch('assets/styles.css');
+    return res.text();
+  });
+
+  // The unconditional rule must set `color`, so a browser without
+  // background-clip:text still paints readable text.
+  expect(css).toMatch(/\.marquee__headline\s*\{[^}]*color:\s*var\(--text-primary\)/);
+  // Transparency may only appear inside a support query or forced-colors reset.
+  expect(css).toMatch(/@supports[^{]*background-clip:\s*text/);
+});
+
+test('headline is never rendered below 40px, where the darkest stop fails AA', async ({ page }) => {
+  for (const width of [320, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    const size = await page.locator('.marquee__headline')
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    expect(size, `headline at ${width}px viewport`).toBeGreaterThanOrEqual(40);
+  }
+});

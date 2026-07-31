@@ -121,3 +121,33 @@ body { overflow: hidden; }
   max-width: 20ch;          /* [tune] — Task 14 resolves this against a render */
   text-wrap: balance;
 }
+
+/* ---- The one colour moment, §3 / §3.1 ----
+   Order is load-bearing: the solid colour is unconditional, and transparency
+   is only claimed where the gradient is known to paint. Reversing these two
+   blocks turns a rendering quirk into an invisible headline. */
+.marquee__headline {
+  color: var(--text-primary);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .marquee__headline {
+    background-image: linear-gradient(
+      180deg,
+      #E4F6F0 0%,
+      #9DCFCA 31%,
+      #6B95AC 68%,
+      #45657D 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+@media (forced-colors: active) {
+  .marquee__headline {
+    -webkit-text-fill-color: revert;
+    background-image: none;
+  }
+}
