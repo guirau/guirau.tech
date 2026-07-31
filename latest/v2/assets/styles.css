@@ -123,9 +123,11 @@ body { overflow: hidden; }
 }
 
 /* ---- The one colour moment, §3 / §3.1 ----
-   Order is load-bearing: the solid colour is unconditional, and transparency
-   is only claimed where the gradient is known to paint. Reversing these two
-   blocks turns a rendering quirk into an invisible headline. */
+   The gate is @supports, not source order: transparency is only ever
+   declared inside the support query, so a browser where the gradient
+   cannot paint keeps the unconditional solid colour and the headline
+   stays readable. Declaring transparency unconditionally would turn a
+   rendering quirk into an invisible headline. */
 .marquee__headline {
   color: var(--text-primary);
 }

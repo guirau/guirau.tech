@@ -52,8 +52,18 @@ test('headline declares a solid colour before the gradient claims it', async ({ 
   // The unconditional rule must set `color`, so a browser without
   // background-clip:text still paints readable text.
   expect(css).toMatch(/\.marquee__headline\s*\{[^}]*color:\s*var\(--text-primary\)/);
-  // Transparency may only appear inside a support query or forced-colors reset.
-  expect(css).toMatch(/@supports[^{]*background-clip:\s*text/);
+
+  // Transparency is only ever declared once, and only after the @supports
+  // gate opens — never as an unconditional rule.
+  const transparentFills = [...css.matchAll(/-webkit-text-fill-color:\s*transparent/g)];
+  expect(transparentFills).toHaveLength(1);
+  // Anchor on the rule itself, not the bare `@supports` keyword — the
+  // explanatory comment above also mentions "@supports" in prose, and a
+  // keyword-only search would match that first.
+  const supportsAt = css.indexOf('@supports (background-clip: text)');
+  expect(supportsAt).toBeGreaterThan(-1);
+  expect(transparentFills[0].index, 'transparent fill must live inside the @supports gate')
+    .toBeGreaterThan(supportsAt);
 });
 
 test('headline is never rendered below 40px, where the darkest stop fails AA', async ({ page }) => {
