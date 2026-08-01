@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { faceDistance, chooseEndFraming, frustumBias } from '../../src/robot/camera.js';
+import { faceDistance, chooseEndFraming, frustumBias, biasFractions } from '../../src/robot/camera.js';
 
 const FOV = 35;
 const close = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} !== ${b}`);
@@ -57,4 +57,17 @@ test('frustumBias scales with distance — the same k means the same screen frac
   const near = frustumBias({ ...args, distance: 1 });
   const far  = frustumBias({ ...args, distance: 4 });
   close(far.x / near.x, 4);
+});
+
+test('biasFractions switches at the 900px breakpoint', () => {
+  assert.deepEqual(biasFractions(900), { kx: 0.12, ky: 0.10 });
+  assert.deepEqual(biasFractions(899), { kx: 0, ky: 0.06 });
+  assert.deepEqual(biasFractions(1440), { kx: 0.12, ky: 0.10 });
+});
+
+test('framings are frozen — a caller cannot corrupt the shared constants', () => {
+  const framing = chooseEndFraming(1080);
+  assert.ok(Object.isFrozen(framing));
+  assert.ok(Object.isFrozen(framing.position));
+  assert.throws(() => { framing.position[2] = 99; }, TypeError);
 });

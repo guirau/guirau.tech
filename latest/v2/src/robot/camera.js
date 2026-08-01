@@ -14,8 +14,16 @@ export function faceDistance({ subjectSize, fov, aspect }) {
   return subjectSize / (2 * Math.tan(rad(fov) / 2) * Math.min(aspect, 1));
 }
 
-const FULL_BODY = { name: 'full-body', position: [0, 1.00, 3.50], lookAt: [0, 1.00, 0] };
-const CHEST_UP  = { name: 'chest-up',  position: [0, 1.45, 1.50], lookAt: [0, 1.45, 0] };
+const FULL_BODY = Object.freeze({
+  name: 'full-body',
+  position: Object.freeze([0, 1.00, 3.50]),
+  lookAt: Object.freeze([0, 1.00, 0]),
+});
+const CHEST_UP = Object.freeze({
+  name: 'chest-up',
+  position: Object.freeze([0, 1.45, 1.50]),
+  lookAt: Object.freeze([0, 1.45, 0]),
+});
 
 /** Short viewports cannot fit a 1.8-unit figure without shrinking it to nothing. */
 export const SHORT_VIEWPORT_PX = 620;
