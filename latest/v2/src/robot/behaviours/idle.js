@@ -1,8 +1,10 @@
 // Idle sway. Pure: (time) -> pose deltas.
 //
-// The three frequencies are deliberately incommensurate (spec §6.3). Their
-// ratios do not reduce to small integers, so the combined motion has no short
-// common period and never reads as a loop.
+// The three frequencies (spec §6.3) have pairwise-coprime numerators over a
+// common denominator of 100, so the combined motion's exact period is 100
+// seconds. That is far beyond what reads as a loop; what matters is that no
+// SHORT common period exists, and none does: the pairwise ratios 23:31,
+// 23:17 and 31:17 do not reduce.
 export const IDLE_FREQUENCIES = Object.freeze({
   torso: 0.23,
   shoulders: 0.31,

@@ -22,20 +22,28 @@ test('is deterministic — the same time gives the same pose', () => {
   assert.deepEqual(idlePose(12.345), idlePose(12.345));
 });
 
-test('does not repeat within a two-minute window', () => {
-  // If the frequencies shared a common period the pose would recur exactly.
+test('does not repeat within one 95-second window', () => {
+  // The exact common period is 100 s (pairwise-coprime numerators over 100),
+  // so inside one period no two sampled poses may coincide. The window stops
+  // short of t=100 deliberately: at the true period the pose recurs by
+  // construction, and only float rounding hides it.
   const at = (t) => JSON.stringify(idlePose(t));
   const seen = new Set();
   let collisions = 0;
-  for (let t = 0; t < 120; t += 0.25) {
+  for (let t = 0; t < 95; t += 0.25) {
     const key = at(t);
     if (seen.has(key)) collisions++;
     seen.add(key);
   }
-  assert.equal(collisions, 0, 'idle motion repeated inside two minutes');
+  assert.equal(collisions, 0, 'idle motion repeated inside one period');
 });
 
 test('touches only torso, shoulders and head — never the hands or the root', () => {
   const nodes = Object.keys(idlePose(3.2)).sort();
   assert.deepEqual(nodes, ['Head', 'Shoulder_L', 'Shoulder_R', 'Torso']);
+});
+
+test('shoulders mirror — the arms breathe together, not in parallel', () => {
+  const pose = idlePose(7.7);
+  assert.equal(pose.Shoulder_L.rz, -pose.Shoulder_R.rz);
 });
