@@ -6,6 +6,8 @@
 // they are not competing writers, they are two addends.
 
 const AXES = { rx: 'x', ry: 'y', rz: 'z' };
+const AXIS_KEYS = Object.keys(AXES);
+const AXIS_ENTRIES = Object.entries(AXES);
 
 export const EMPTY_POSE = Object.freeze({});
 
@@ -17,7 +19,7 @@ export function composePose(fragments) {
     if (!fragment) continue;
     for (const [nodeName, delta] of Object.entries(fragment)) {
       const target = (out[nodeName] ??= { rx: 0, ry: 0, rz: 0 });
-      for (const key of Object.keys(AXES)) {
+      for (const key of AXIS_KEYS) {
         if (delta[key] !== undefined) target[key] += delta[key];
       }
     }
@@ -56,7 +58,7 @@ export function applyPose(rig, pose, rest = EMPTY_POSE) {
     const node = rig[nodeName];
     if (!node) continue;
     const base = rest[nodeName];
-    for (const [key, axis] of Object.entries(AXES)) {
+    for (const [key, axis] of AXIS_ENTRIES) {
       node.rotation[axis] = (base?.[axis] ?? 0) + (delta[key] ?? 0);
     }
   }
