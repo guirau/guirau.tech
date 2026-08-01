@@ -11,12 +11,16 @@ test('app.js is marked generated and names its build command', () => {
   assert.match(head, /npm run build/);
 });
 
+// Local-dev guard, not a deploy gate: git rewrites only files whose content
+// changes on checkout, so a branch switch can make src/ look newer than a
+// byte-identical bundle. If this fires right after a checkout or stash pop,
+// run npm run build once - a no-diff rebuild clears the false alarm.
 test('app.js is newer than every source file it is built from', () => {
   const bundle = statSync(join(root, 'assets/app.js')).mtimeMs;
 
   const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const p = join(dir, e.name);
-    return e.isDirectory() ? walk(p) : p.endsWith('.js') ? [p] : [];
+    return e.isDirectory() ? walk(p) : /\.m?js$/.test(p) ? [p] : [];
   });
 
   const stale = walk(join(root, 'src'))

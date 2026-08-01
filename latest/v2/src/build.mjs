@@ -4,7 +4,7 @@
 // what ships. Spec §3.1: re-run this and stage the output in the SAME commit as
 // any src/ change, or the deployed behaviour silently lags the source.
 import { build } from 'esbuild';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 
 const OUT = 'assets/app.js';
