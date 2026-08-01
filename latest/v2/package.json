@@ -8,11 +8,13 @@
     "serve": "python3 -m http.server 4173",
     "test": "playwright test",
     "test:unit": "node --test tests/unit/",
-    "build": "echo 'No bundle yet — Plan 2 replaces this with esbuild.' && exit 0",
+    "build": "node src/build.mjs",
     "subset-fonts": "src/tools/subset-fonts.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
-    "geist": "1.7.2"
+    "esbuild": "^0.24.2",
+    "geist": "1.7.2",
+    "three": "^0.170.0"
   }
 }
