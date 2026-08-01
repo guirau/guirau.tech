@@ -2,8 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test('tab order reaches every control in a sensible sequence', async ({ page }) => {
   await page.goto('/');
+  // One Tab per focusable control on the page surface (closed dialogs are
+  // correctly outside the tab order), so the loop bound tracks the markup
+  // instead of a magic number that goes stale as later plans add surface.
+  const focusable = await page.locator('.marquee a, .marquee button').count();
+  expect(focusable).toBeGreaterThanOrEqual(4);
   const order = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < focusable; i++) {
     await page.keyboard.press('Tab');
     order.push(await page.evaluate(() => document.activeElement.textContent.trim()));
   }
