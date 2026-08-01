@@ -1,6 +1,7 @@
-// A stand-in robot built from primitives, satisfying the spec §4.1 contract:
-//   Root > Torso > { Neck > Head, Shoulder_{L,R} > Forearm_{L,R} > Hand_{L,R} }
-// normalized to 1.8 units tall, origin at the feet, facing +Z.
+// A stand-in robot built from primitives, satisfying the spec §4.1 NAMING
+// contract: Root > Torso > { Neck > Head, Shoulder_{L,R} > Forearm_{L,R} > Hand_{L,R} }
+// facing +Z. Dimensions are approximate (~1.91 units tall, feet near y=0);
+// the real GLB is numerically normalized to 1.8 by Plan 3's split gate.
 //
 // Dev-only: excluded from the bundle. Its purpose is to let the runtime, the
 // behaviours and every test be written and verified before the real GLB exists.
