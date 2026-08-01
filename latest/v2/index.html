@@ -12,6 +12,15 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/styles.css">
 
+  <!-- The face poster is the LCP element. `media` resolves the branch before
+       any JavaScript runs, so reduced-motion users never fetch a frame they
+       will not be shown. Nothing else is preloaded: the GLB and the bundle are
+       both needed AFTER first paint and would compete with LCP. -->
+  <link rel="preload" as="image" href="assets/face-1024.jpg" fetchpriority="high"
+        media="(prefers-reduced-motion: no-preference)">
+  <link rel="preload" as="image" href="assets/robot-poster.webp" fetchpriority="high"
+        media="(prefers-reduced-motion: reduce)">
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",

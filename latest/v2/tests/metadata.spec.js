@@ -28,3 +28,31 @@ test('every asset path is relative, so the folder can be promoted to root', () =
   const absolute = [...html.matchAll(/(?:href|src)="(\/[^/][^"]*)"/g)].map((m) => m[1]);
   expect(absolute, `absolute paths would break root promotion: ${absolute}`).toEqual([]);
 });
+
+test('preloads branch on prefers-reduced-motion', async ({ page }) => {
+  await page.goto('/');
+  const preloads = await page.evaluate(() =>
+    [...document.querySelectorAll('link[rel="preload"]')].map((l) => ({
+      href: l.getAttribute('href'),
+      media: l.getAttribute('media'),
+      priority: l.getAttribute('fetchpriority'),
+    }))
+  );
+
+  const face = preloads.find((p) => p.href === 'assets/face-1024.jpg');
+  expect(face, 'face poster must be preloaded').toBeTruthy();
+  expect(face.media).toBe('(prefers-reduced-motion: no-preference)');
+  expect(face.priority).toBe('high');
+
+  const poster = preloads.find((p) => p.href === 'assets/robot-poster.webp');
+  expect(poster, 'reduced-motion poster must be preloaded').toBeTruthy();
+  expect(poster.media).toBe('(prefers-reduced-motion: reduce)');
+});
+
+test('nothing else is preloaded — the GLB and bundle would compete with LCP', async ({ page }) => {
+  await page.goto('/');
+  const hrefs = await page.evaluate(() =>
+    [...document.querySelectorAll('link[rel="preload"]')].map((l) => l.getAttribute('href'))
+  );
+  expect(hrefs.sort()).toEqual(['assets/face-1024.jpg', 'assets/robot-poster.webp']);
+});
