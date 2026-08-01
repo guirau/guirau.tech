@@ -242,8 +242,11 @@ string. Audience is generic for now; niche re-skins come later.
 - **Promoting v2 to root replaces the live v0 site.** v0 is what Meta is verifying
   against right now. Do not promote without carrying over and re-verifying: the
   legal string, the Meta domain-verification meta tag, the canonical URL, and the
-  favicon. Recent history shows a deliberate revert *back* to v0 for verification,
-  so treat root as load-bearing.
+  favicon. Additionally, `assets/robot-poster.webp` must exist on disk before
+  promotion: its preload is committed ahead of the file by design, and shipping
+  the 404 to root would hit reduced-motion users specifically. Recent history
+  shows a deliberate revert *back* to v0 for verification, so treat root as
+  load-bearing.
 - **v1 is built but undocumented here.** If `latest/v1/` is ever revived, recover
   its design system and section blueprint from git history (before the v2
   rewrite) rather than reconstructing them.
