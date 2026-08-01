@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { bindRig, REQUIRED_NODES, RigError } from '../../src/robot/rig.js';
+import { bindRig, REQUIRED_NODES, RigError, DuplicateNodeError } from '../../src/robot/rig.js';
 
 // A minimal stand-in for an Object3D tree — bindRig must not need Three.js.
 const node = (name, children = []) => ({
@@ -40,5 +40,10 @@ test('throws a RigError naming exactly which nodes are missing', () => {
 test('a duplicate node name is an error, not a silent last-wins', () => {
   const tree = completeTree();
   tree.children[0].children.push(node('Head'));
-  assert.throws(() => bindRig(tree), /duplicate/i);
+  assert.throws(() => bindRig(tree), (err) => {
+    assert.ok(err instanceof DuplicateNodeError, 'must be the typed error');
+    assert.deepEqual(err.duplicates, ['Head']);
+    assert.match(err.message, /duplicate/i);
+    return true;
+  });
 });
