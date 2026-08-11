@@ -1,4 +1,3 @@
-
 # Apple HIG — Web-Relevant Design System
 
 > Extracted from Apple's Human Interface Guidelines, filtered to what is directly useful for building a **website** (app-only and platform-specific guidance omitted).
@@ -7,7 +6,7 @@
 
 ## Core principles (the "why" behind
 
->every choice)
+> every choice)
 
 Apple's design rests on three ideas worth internalizing because they drive concrete decisions:
 
