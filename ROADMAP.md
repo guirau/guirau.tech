@@ -12,10 +12,11 @@
 
 | | |
 |---|---|
-| Branch | `feature/v2-build` (85 commits ahead of `main`; **nothing pushed**; `main` untouched and still serving the live v0 site) |
-| Last commit | `999eebc` — `test: honest period claim and a safe non-repetition window` |
+| **Resume on** | **`feature/v2-build`** — `git checkout feature/v2-build` before anything else. All 87 commits of v2 work live here and nowhere else. |
+| Branch state | 87 commits ahead of `main`, pushed to `origin/feature/v2-build` (tracking). `main` is untouched by v2 work and still serves the live v0 site. |
+| Last commit | `git log -1` on the branch. The P2-Task-6 checkpoint this document describes is `a8ee8d1`; anything after it is this document's own upkeep. |
 | Test state | **66 Playwright + 28 unit tests, all green** (`cd latest/v2 && npx playwright test` and `npm run test:unit`) |
-| Working tree | Clean except one uncommitted IDE-formatter change to `docs/support/apple_design_system_app.md` (table realignment, not agent-made; harmless — commit or discard at will, but note the *web* Apple doc must stay byte-verbatim per CLAUDE.md) |
+| Working tree | Clean. |
 | Plan 1 (page) | **COMPLETE** — all 20 tasks, both reviews each |
 | Plan 2 (runtime) | Tasks 1–6 of 13 **COMPLETE**; resume at **Task 7** |
 | Plan 3 (asset) | Not started (requires human prerequisites, see §7) |
